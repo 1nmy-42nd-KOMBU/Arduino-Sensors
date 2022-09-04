@@ -3,5 +3,5 @@
     "configuration": "mode=off",
     "board": "arduino:megaavr:nona4809",
     "programmer": "arduino:medbg",
-    "sketch": "lflash.ino"
+    "sketch": "main.ino"
 }
