@@ -16,6 +16,7 @@ void loop() {
     digitalWrite( LED_PIN, HIGH );
     Serial.println("HIGH");
   }
+  delay(500);
     // if( digitalRead( BUMPER_PIN ) == LOW ){
     //     while( digitalRead( BUMPER_PIN ) == LOW ){
     //         delay( 10 );
