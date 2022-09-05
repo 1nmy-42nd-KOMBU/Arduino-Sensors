@@ -32,7 +32,6 @@
                 "ARDUINO=10819",
                 "ARDUINO_AVR_NANO_EVERY",
                 "ARDUINO_ARCH_MEGAAVR",
-                "AVR_NANO_4809_328MODE",
                 "MILLIS_USE_TIMERB3",
                 "NO_EXTERNAL_I2C_PULLUP",
                 "__DBL_MIN_EXP__=(-125)",
