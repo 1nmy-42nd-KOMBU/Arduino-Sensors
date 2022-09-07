@@ -17,8 +17,9 @@ void loop() {
   } else {
     digitalWrite( LED_PIN, LOW );
   }
-  delay(500);
   // スイッチの状態を表示
   Serial.print( digitalRead( MicSw2 ) );
   Serial.println( digitalRead( MicSw1 ) );
+
+  delay(500);
 }
