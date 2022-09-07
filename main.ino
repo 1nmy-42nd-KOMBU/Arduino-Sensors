@@ -1,22 +1,24 @@
 const int LED_PIN = 13;
-const int BUMPER_PIN = 12;
+const int MicSw1 = 12;
+const int MicSw2 = 11;
  
 void setup()
 {
     pinMode( LED_PIN, OUTPUT );
-    pinMode( BUMPER_PIN, INPUT_PULLUP );
+    pinMode( MicSw1, INPUT_PULLUP );
+    pinMode( MicSw2, INPUT_PULLUP );
     Serial.begin(9600);
 }
 
 void loop() {
-  if ( digitalRead( BUMPER_PIN ) == LOW ){
-    digitalWrite( LED_PIN, LOW );
-  } else {
+  if ( digitalRead( MicSw1 ) == 1 && digitalRead( MicSw2 ) == 1 ){
     digitalWrite( LED_PIN, HIGH );
+  } else {
+    digitalWrite( LED_PIN, LOW );
   }
   delay(500);
-    // if( digitalRead( BUMPER_PIN ) == LOW ){
-    //     while( digitalRead( BUMPER_PIN ) == LOW ){
+    // if( digitalRead( MicSw1 ) == LOW ){
+    //     while( digitalRead( MicSw1 ) == LOW ){
     //         delay( 10 );
     //         Serial.println("low");
     //     }
@@ -26,5 +28,6 @@ void loop() {
     // } else {
     //     digitalWrite( LED_PIN, LOW );
     // }
-    Serial.println( digitalRead( BUMPER_PIN ) );
+  Serial.print( digitalRead( MicSw2 ) );
+  Serial.println( digitalRead( MicSw1 ) );
 }
