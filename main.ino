@@ -11,23 +11,14 @@ void setup()
 }
 
 void loop() {
+  // 2つのスイッチが両方押されてたらLEDが光る
   if ( digitalRead( MicSw1 ) == 1 && digitalRead( MicSw2 ) == 1 ){
     digitalWrite( LED_PIN, HIGH );
   } else {
     digitalWrite( LED_PIN, LOW );
   }
   delay(500);
-    // if( digitalRead( MicSw1 ) == LOW ){
-    //     while( digitalRead( MicSw1 ) == LOW ){
-    //         delay( 10 );
-    //         Serial.println("low");
-    //     }
- 
-    //     digitalWrite( LED_PIN, HIGH );
-    //     Serial.println("high");
-    // } else {
-    //     digitalWrite( LED_PIN, LOW );
-    // }
+  // スイッチの状態を表示
   Serial.print( digitalRead( MicSw2 ) );
   Serial.println( digitalRead( MicSw1 ) );
 }
