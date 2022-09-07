@@ -11,7 +11,6 @@
 //________________________________________________________________________________
 
 #include<Wire.h> // I2C library
-#include <Servo.h>
 
 ///----------------------------------------------
 ///----------------------------------------------
@@ -40,7 +39,6 @@ int instruction[5] = {5,0,0,0,0};
 //________________________________________________________________________________
 //________________________________________________________________________________
 
-Servo temp_servo;
 int temp_sensor = 0;
 
 void setup()
@@ -51,12 +49,12 @@ void setup()
   
   // Debugging
   Serial.begin(9600);
-    
 }
+
 //________________________________________________________________________________
 void loop()
 {
-  delay(500);      
+  delay(50);      
 }
 
 //________________________________________________________________________________
@@ -83,8 +81,6 @@ void receiveI2C(int bytesIn)
   int x = Wire.read(); 
   // Read the last dummy byte (has no meaning, but must read it)
 
-
-
   if( instruction[0] == 1 )  
   {
     Serial.println("  Light ");
@@ -104,51 +100,6 @@ void receiveI2C(int bytesIn)
       Serial.println("on");
       digitalWrite(instruction[1], HIGH);
     }
-            
-    
-  }
-  else if( instruction[0] == 2 )  
-  {
-    Serial.println("  Servo Motor ");
-    
-    Serial.print("Pin: "); 
-    Serial.println(instruction[1]);
-    temp_servo.attach(instruction[1]);
-    
-    
-    //Uncomment the next line if you are using EV3 Graphical Programming
-    //instruction[2] = instruction[2]*2 + instruction[3];
-    
-    Serial.print("Angle: ");
-    Serial.println(instruction[2]);
-    temp_servo.write(instruction[2]);
-    
-  }
-  else if( instruction[0] == 3 )  
-  {
-    Serial.println("  DC Motor ");
-    
-    Serial.print("Pin1: "); 
-    Serial.print(instruction[1]);
-    pinMode(instruction[1], OUTPUT);
-    
-    Serial.print("  Speed1: "); 
-    Serial.println(instruction[2]);
-    analogWrite(instruction[1], instruction[2]*2.55);
-    
-    Serial.print("Pin2: "); 
-    Serial.print(instruction[3]);
-    pinMode(instruction[3], OUTPUT);
-    
-    Serial.print("  Speed2: "); 
-    Serial.println(instruction[4]);
-    analogWrite(instruction[3], instruction[4]*2.55);
-    
-    Serial.print("Result movement: "); 
-    if (instruction[2] !=0)
-      Serial.println("Forward");
-    else
-      Serial.println("Backwards");    
   }
   else if( instruction[0] == 4 )  
   {
@@ -173,7 +124,6 @@ void receiveI2C(int bytesIn)
       temp_sensor = digitalRead(instruction[1]);
     }
   }
-   
 }//end recieveI2C
 
 //________________________________________________________________________________
