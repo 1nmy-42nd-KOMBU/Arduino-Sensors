@@ -15,7 +15,7 @@
 ///----------------------------------------------
 ///----------------------------------------------
 
-int instruction[] = {5,0,0,0,0};
+int instruction[5] = {5,0,0,0,0};
 
 /// instruction[0] = 1 (LED), 4 (sensor)
 ///
@@ -39,8 +39,6 @@ void setup()
   Wire.onRequest(requestEvent); // Sending information back to the NXT/EV3
   Wire.onReceive(receiveI2C); // Receiving information!
   pinMode(13, OUTPUT); // LED
-  pinMode(12, INPUT_PULLUP); // MicroSwitch 1
-  pinMode(11, INPUT_PULLUP); // MicroSwitch 2
   
   // Debugging
   Serial.begin(9600);
@@ -96,12 +94,26 @@ void receiveI2C(int bytesIn)
   }
   else if( instruction[0] == 4 )  
   {
-    Serial.println(" MinroSwitch Sensor "); 
+    Serial.println("  Sensor "); 
     
     Serial.print("Pin: "); 
     Serial.println(instruction[1]);
     
-    temp_sensor = digitalRead(instruction[1]);
+    if ( instruction[2] == true )
+    {
+      Serial.println("Analog");
+      
+      int temp_pin = A0;
+      if (instruction[1] !=0 )  temp_pin += instruction[1];
+      
+      temp_sensor = analogRead(temp_pin);
+    }
+    else
+    {
+      Serial.println("Digital");
+      pinMode(instruction[1], INPUT);
+      temp_sensor = digitalRead(instruction[1]);
+    }
   }
 }//end recieveI2C
 
