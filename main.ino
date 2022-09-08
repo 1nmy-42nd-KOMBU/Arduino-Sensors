@@ -39,8 +39,8 @@ void setup()
   Wire.onRequest(requestEvent); // Sending information back to the NXT/EV3
   Wire.onReceive(receiveI2C); // Receiving information!
   pinMode(13, OUTPUT); // LED
-  pinMode(12, INPUT_PULLUP) // MicroSwitch 1
-  pinMode(11, INPUT_PULLUP) // MicroSwitch 2
+  pinMode(12, INPUT_PULLUP); // MicroSwitch 1
+  pinMode(11, INPUT_PULLUP); // MicroSwitch 2
   
   // Debugging
   Serial.begin(9600);
@@ -101,7 +101,7 @@ void receiveI2C(int bytesIn)
     Serial.print("Pin: "); 
     Serial.println(instruction[1]);
     
-    temp_sensor = digitalRead(instruction[1])
+    temp_sensor = digitalRead(instruction[1]);
   }
 }//end recieveI2C
 
