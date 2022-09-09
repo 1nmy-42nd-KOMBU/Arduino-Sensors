@@ -1,7 +1,0 @@
-{
-    "port": "COM3",
-    "configuration": "mode=off",
-    "board": "arduino:megaavr:nona4809",
-    "programmer": "arduino:medbg",
-    "sketch": "main.ino"
-}
