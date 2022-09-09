@@ -35,21 +35,21 @@ int temp_sensor = 0;
 
 void setup()
 {
-  Wire.begin(0x04); // set the slave address
-  Wire.onRequest(requestEvent); // Sending information back to the NXT/EV3
-  Wire.onReceive(receiveI2C); // Receiving information!
-  pinMode(13, OUTPUT); // LED
-  pinMode(12, INPUT_PULLUP); // MicroSwitch 1
-  pinMode(11, INPUT_PULLUP); // MicroSwitch 2
-  
-  // Debugging
-  Serial.begin(9600);
+    Wire.begin(0x04); // set the slave address
+    Wire.onRequest(requestEvent); // Sending information back to the NXT/EV3
+    Wire.onReceive(receiveI2C); // Receiving information!
+    pinMode(13, OUTPUT); // LED
+    pinMode(12, INPUT_PULLUP); // MicroSwitch 1
+    pinMode(11, INPUT_PULLUP); // MicroSwitch 2
+    
+    // Debugging
+    Serial.begin(9600);
 }
 
 //________________________________________________________________________________
 void loop()
 {
-  delay(50);      
+    delay(50);
 }
 
 //________________________________________________________________________________
@@ -63,57 +63,57 @@ int byte_count = 0;
 // When data is received from NXT/EV3, this function is called.
 void receiveI2C(int bytesIn)
 {
-  read_byte = bytesIn;
-  byte_count = 0;
-  while(1 < Wire.available()) // loop through all but the last
-  {
-    read_byte = Wire.read(); 
-    
-    instruction[byte_count] = read_byte;
-    
-    byte_count++;
-  }
-  int x = Wire.read(); // Read the last dummy byte (has no meaning, but must read it)
+    read_byte = bytesIn;
+    byte_count = 0;
+    while(1 < Wire.available()) // loop through all but the last
+    {
+        read_byte = Wire.read(); 
+        
+        instruction[byte_count] = read_byte;
+        
+        byte_count++;
+    }
+    int x = Wire.read(); // Read the last dummy byte (has no meaning, but must read it)
 
-  if( instruction[0] == 1 )  
-  {
-    Serial.println("  Light ");
-    
-    Serial.print("Pin: "); 
-    Serial.println(instruction[1]);
-    
-    Serial.print("State: ");
-    if(instruction[2] == 0) 
+    if( instruction[0] == 1 )  
     {
-      Serial.println("off");
-      digitalWrite(instruction[1], LOW);
+        Serial.println("  Light ");
+        
+        Serial.print("Pin: "); 
+        Serial.println(instruction[1]);
+        
+        Serial.print("State: ");
+        if(instruction[2] == 0) 
+        {
+            Serial.println("off");
+            digitalWrite(instruction[1], LOW);
+        }
+        else                    
+        {
+            Serial.println("on");
+            digitalWrite(instruction[1], HIGH);
+        }
     }
-    else                    
+    else if( instruction[0] == 4 )  
     {
-      Serial.println("on");
-      digitalWrite(instruction[1], HIGH);
+        Serial.println(" MinroSwitch Sensor "); 
+        
+        Serial.print("Pin: "); 
+        Serial.println(instruction[1]);
+        
+        temp_sensor = digitalRead(instruction[1]);
     }
-  }
-  else if( instruction[0] == 4 )  
-  {
-    Serial.println(" MinroSwitch Sensor "); 
-    
-    Serial.print("Pin: "); 
-    Serial.println(instruction[1]);
-    
-    temp_sensor = digitalRead(instruction[1]);
-  }
 }//end recieveI2C
 
 //________________________________________________________________________________
 
 void requestEvent()
 {  
-  if (instruction[0] == 4)
-  {
-    Wire.write(temp_sensor); // respond with message
-    Serial.print("Value: ");
-    Serial.println(temp_sensor);
-  } 
+    if (instruction[0] == 4)
+    {
+        Wire.write(temp_sensor); // respond with message
+        Serial.print("Value: ");
+        Serial.println(temp_sensor);
+    } 
 }//end requestEvent
 //________________________________________________________________________________
