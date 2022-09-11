@@ -22,9 +22,9 @@ void loop()
 //________________________________________________________________________________
 void requestEvent()
 {
-    byte temp_sensor[2] = {digitalRead(12), digitalRead(11)};
+    byte temp_sensor[8] = {127,2,3,4,5,6,7,8};
     int tmp_sensor[2] = {digitalRead(12), digitalRead(11)};
-    Wire.write(temp_sensor, 2); // respond with message
+    Wire.write(temp_sensor, 8); // respond with message
     Serial.print("Value: ");
     Serial.print(tmp_sensor[0]);
     Serial.println(tmp_sensor[1]);
