@@ -1,67 +1,162 @@
-#include<Wire.h> // I2C library
+#include <Wire.h>
 
-const int pingPin = 2;
-unsigned long duration;
-int cm;
+#define BNO055 0x28 //9軸センサ　IICアドレス
 
-//________________________________________________________________________________
+volatile int RET_MSG;
+volatile int DIR;
+volatile int GYRO;
+volatile int PITCH;
+volatile int ROLL;
+
 void setup()
 {
-    Wire.begin(0x04); // set the slave address
-    Wire.onRequest(requestEvent); // Sending information back to the NXT/EV3
-    pinMode(13, OUTPUT); // LED
-    pinMode(12, INPUT_PULLUP); // MicroSwitch 1
-    pinMode(11, INPUT_PULLUP); // MicroSwitch 2
+  Serial.begin(9600);
 
-    pinMode(pingPin, OUTPUT);
-    
-    // Debugging
-    Serial.begin(9600);
+  Wire.begin(); //I2C通信開始
+  Wire.beginTransmission(BNO055);
+  Wire.write(0x3B); //register設定
+  Wire.write(0x00);
+  RET_MSG = Wire.endTransmission(); // データの送信と終了処理
+  if (RET_MSG == 0) {} else {
+    Serial.print("ERROR NO.="); //通信出来ない
+    Serial.println(RET_MSG);
 }
 
-//________________________________________________________________________________
+  Wire.beginTransmission(BNO055);
+  Wire.write(0x41); //register設定
+  Wire.write(0x21);
+  Wire.write(0x04);
+  RET_MSG = Wire.endTransmission(); // データの送信と終了処理
+  if (RET_MSG == 0) {} else {
+    Serial.print("ERROR NO.="); //通信出来ない
+    Serial.println(RET_MSG);
+  }
+
+  Wire.beginTransmission(BNO055);
+  Wire.write(0x3D); //register設定
+  Wire.write(0x0C);
+  RET_MSG = Wire.endTransmission(); // データの送信と終了処理
+  if (RET_MSG == 0) {} else {
+    Serial.print("ERROR NO.="); //通信出来ない
+    Serial.println(RET_MSG);
+  }
+}
+
 void loop()
 {
-    delay(5);
+
+  DIR = getDIR(0);
+  Serial.print(DIR);
+  Serial.print("\t");
+
+  GYRO = getGYRO(0);
+  Serial.print(GYRO);
+  Serial.print("\t");
+
+  PITCH = getPITCH(0);
+  Serial.print(PITCH);
+  Serial.print("\t");
+
+  ROLL = getROLL(0);
+  Serial.println(ROLL);
+  delay(1000);
+
 }
 
-//________________________________________________________________________________
-void requestEvent()
+
+unsigned int getGYRO(unsigned char) //ジャイロ角速度を読み込み。
 {
-    byte temp_sensor[2] = {digitalRead(12), digitalRead(11)};
-    int tmp_sensor[2] = {digitalRead(12), digitalRead(11)};
-    Wire.write(temp_sensor, 2); // respond with message
-    Serial.print("Value: ");
-    Serial.print(tmp_sensor[0]);
-    Serial.println(tmp_sensor[1]);
+  typedef union { //受信データ用共用体
+    unsigned int W;
+    struct {
+    unsigned char L;
+    unsigned char H;
+    };
+  } U_UINT;
+  U_UINT data; // 受信データ
+  int reg; //レジスターアドレス
+  reg = 0x18; // Register 0x1E:GYRO_DATA_Z (LSB-MSB)
+  Wire.beginTransmission(BNO055); //通信開始
+  Wire.write(reg); //register
+  Wire.endTransmission(); //通信終了
 
-    //ピンをOUTPUTに設定（パルス送信のため）
-    pinMode(pingPin, OUTPUT);
-    //LOWパルスを送信
-    digitalWrite(pingPin, LOW);
-    delayMicroseconds(2);  
-    //HIGHパルスを送信
-    digitalWrite(pingPin, HIGH);  
-    //5uSパルスを送信してPingSensorを起動
-    delayMicroseconds(5); 
-    digitalWrite(pingPin, LOW); 
-    
-    //入力パルスを読み取るためにデジタルピンをINPUTに変更（シグナルピンを入力に切り替え）
-    pinMode(pingPin, INPUT);   
-    
-    //入力パルスの長さを測定
-    duration = pulseIn(pingPin, HIGH);  
+  Wire.requestFrom(BNO055, 2);
+  if (Wire.available() > 1) {
+    data.L = Wire.read(); //１バイト分のデータの読み込み
+    data.H = Wire.read(); //次の１バイト分のデータを読み込み
+  }
+  return (data.W);
+}
 
-    //パルスの長さを半分に分割
-    duration=duration/2;  
-    //cmに変換
-    cm = int(duration/29);
+unsigned int getDIR(unsigned char) //ヘッドアップ角度を読み込み。
+{
+  typedef union { //受信データ用共用体
+    unsigned int W;
+    struct {
+    unsigned char L;
+    unsigned char H;
+    };
+  } U_UINT;
+  U_UINT data; // 受信データ
+  int reg; //レジスターアドレス
+  reg = 0x1A; // Register 0x1A:dir(EUL_DATA_X LSB-MSB)
+  Wire.beginTransmission(BNO055); //通信開始
+  Wire.write(reg); //register
+  Wire.endTransmission(); //通信終了
 
-    Serial.print(cm);
-    Serial.print("cm");
-    Serial.println();
+  Wire.requestFrom(BNO055, 2);
+  if (Wire.available() > 1) {
+    data.L = Wire.read(); //１バイト分のデータの読み込み
+    data.H = Wire.read(); //次の１バイト分のデータを読み込み
+  }
+  data.W = data.W / 16;
+  return (data.W);
+}
 
-    delay(25);
-}//end requestEvent
+unsigned int getROLL(unsigned char) //ロール角度を読み込み。
+{
+  typedef union { //受信データ用共用体
+    unsigned int W;
+    struct {
+    unsigned char L;
+    unsigned char H;
+    };
+  } U_UINT;
+  U_UINT data; // 受信データ
+  int reg; //レジスターアドレス
+  reg = 0x1C; // Register 0x1C:ROLL(EUL_DATA_Y LSB-MSB)
+  Wire.beginTransmission(BNO055); //通信開始
+  Wire.write(reg); //register
+  Wire.endTransmission(); //通信終了
 
-//________________________________________________________________________________
+  Wire.requestFrom(BNO055, 2);
+  if (Wire.available() > 1) {
+    data.L = Wire.read(); //１バイト分のデータの読み込み
+    data.H = Wire.read(); //次の１バイト分のデータを読み込み
+  }
+  return (data.W);
+}
+
+unsigned int getPITCH(unsigned char) //ピッチ角度を読み込み。
+{
+    typedef union { //受信データ用共用体
+    unsigned int W;
+    struct {
+    unsigned char L;
+    unsigned char H;
+    };
+  } U_UINT;
+  U_UINT data; // 受信データ
+  int reg; //レジスターアドレス
+  reg = 0x1E; // Register 0x1E:PITCH(LSB-MSB)
+  Wire.beginTransmission(BNO055); //通信開始
+  Wire.write(reg); //register
+  Wire.endTransmission(); //通信終了
+
+  Wire.requestFrom(BNO055, 2);
+  if (Wire.available() > 1) {
+    data.L = Wire.read(); //１バイト分のデータの読み込み
+    data.H = Wire.read(); //次の１バイト分のデータを読み込み
+  }
+  return (data.W);
+}
