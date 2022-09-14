@@ -19,7 +19,7 @@ Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);
 
 void setup(void)
 {
-  Serial.begin(115200);
+  Serial.begin(9600);
   if (!bno.begin())
   {
     Serial.print("No BNO055 detected");

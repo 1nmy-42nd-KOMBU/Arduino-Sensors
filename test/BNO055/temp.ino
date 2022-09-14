@@ -94,13 +94,13 @@ void loop(void)
   /* Get a new sensor event */
   sensors_event_t event;
   bno.getEvent(&event);
-  
+
   /* The processing sketch expects data as roll, pitch, heading */
-  Serial.print((int)event.orientation.x);
+  Serial.print((float)event.orientation.x);
   Serial.print(F(" "));
-  Serial.print((int)event.orientation.y);
+  Serial.print((float)event.orientation.y);
   Serial.print(F(" "));
-  Serial.print((int)event.orientation.z);
+  Serial.print((float)event.orientation.z);
   Serial.println(F(""));
 
 
