@@ -3,7 +3,10 @@
 #include <Adafruit_BNO055.h>
 #include <utility/imumaths.h>
 
-/* This driver uses the Adafruit unified sensor library (Adafruit_Sensor),
+/* Returns the IMU data as both a euler angles and quaternions as the WebSerial
+   3D Model viewer at https://adafruit-3dmodel-viewer.glitch.me/ expects.
+ 
+   This driver uses the Adafruit unified sensor library (Adafruit_Sensor),
    which provides a common 'type' for sensor data and some helper functions.
 
    To use this driver you will also need to download the Adafruit_Sensor
@@ -24,7 +27,7 @@
 
    History
    =======
-   2015/MAR/03  - First release (KTOWN)
+   2020/JUN/01  - First release (Melissa LeBlanc-Williams)
 */
 
 /* Set the delay between fresh samples */
@@ -63,8 +66,8 @@ void displaySensorDetails(void)
 /**************************************************************************/
 void setup(void)
 {
-  Serial.begin(115200);
-  Serial.println("Orientation Sensor Test"); Serial.println("");
+  Serial.begin(9600);
+  Serial.println("WebSerial 3D Firmware"); Serial.println("");
 
   /* Initialise the sensor */
   if(!bno.begin())
@@ -106,13 +109,26 @@ void loop(void)
          +----------+
   */
 
-  /* The processing sketch expects data as roll, pitch, heading */
+  /* The WebSerial 3D Model Viewer expects data as heading, pitch, roll */
   Serial.print(F("Orientation: "));
-  Serial.print((float)event.orientation.x);
-  Serial.print(F(" "));
+  Serial.print(360 - (float)event.orientation.x);
+  Serial.print(F(", "));
   Serial.print((float)event.orientation.y);
-  Serial.print(F(" "));
+  Serial.print(F(", "));
   Serial.print((float)event.orientation.z);
+  Serial.println(F(""));
+
+  /* The WebSerial 3D Model Viewer also expects data as roll, pitch, heading */
+  imu::Quaternion quat = bno.getQuat();
+  
+  Serial.print(F("Quaternion: "));
+  Serial.print((float)quat.w(), 4);
+  Serial.print(F(", "));
+  Serial.print((float)quat.x(), 4);
+  Serial.print(F(", "));
+  Serial.print((float)quat.y(), 4);
+  Serial.print(F(", "));
+  Serial.print((float)quat.z(), 4);
   Serial.println(F(""));
 
   /* Also send calibration data for each sensor. */
@@ -120,12 +136,13 @@ void loop(void)
   bno.getCalibration(&sys, &gyro, &accel, &mag);
   Serial.print(F("Calibration: "));
   Serial.print(sys, DEC);
-  Serial.print(F(" "));
+  Serial.print(F(", "));
   Serial.print(gyro, DEC);
-  Serial.print(F(" "));
+  Serial.print(F(", "));
   Serial.print(accel, DEC);
-  Serial.print(F(" "));
-  Serial.println(mag, DEC);
+  Serial.print(F(", "));
+  Serial.print(mag, DEC);
+  Serial.println(F(""));
 
   delay(BNO055_SAMPLERATE_DELAY_MS);
 }
