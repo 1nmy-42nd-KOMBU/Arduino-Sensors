@@ -30,6 +30,6 @@ void draw()
 void serialEvent(Serial p) {
   if (serial.available() >= 2) 
   {
-     v = p.readString();    
+    v = p.readString();    
   }
 }
