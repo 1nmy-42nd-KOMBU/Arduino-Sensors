@@ -126,7 +126,7 @@ int ultrasonic_sensor(int pin)
 {
   unsigned long duration;
   int cm;
-  const int pingPin = 2;
+  int pingPin = 2;
 
   if (pin == 3)
   {
