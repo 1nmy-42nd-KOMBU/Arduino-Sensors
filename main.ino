@@ -103,11 +103,12 @@ void requestEvent()
 
     Wire.write(temp_sensor, 2); // respond with message
     Serial.print("Value: ");
-    Serial.println(temp_sensor);
+    Serial.print(temp_sensor[0]);
+    Serial.println(temp_sensor[1]);
   }
   else if (instruction[0] == 4) // 適当なデーターを送ってI2C接続を確認
   {
-    byte test_I2C[8] = {0,1,127,-127,1,1,1,1};
+    byte test_I2C[8] = {0,1,127,byte(-127),1,1,1,1};
     Wire.write(test_I2C, 8);
   }
 }//end requestEvent
@@ -116,11 +117,12 @@ void requestEvent()
 
 void microswitches() 
 {
-  microswitches_condition = {digitalRead(12), digitalRead(11)}; // 11が左、12が右
+  microswitches_condition[0] = digitalRead(12);
+  microswitches_condition[1] = digitalRead(11); // 11が左、12が右
 }
 //________________________________________________________________________________
 
-void ultrasonic_sensor(int pin)
+int ultrasonic_sensor(int pin)
 {
   unsigned long duration;
   int cm;
@@ -128,7 +130,7 @@ void ultrasonic_sensor(int pin)
 
   if (pin == 3)
   {
-    const pingPin = 3;
+    pingPin = 3;
   }
 
   //ピンをOUTPUTに設定（パルス送信のため）
