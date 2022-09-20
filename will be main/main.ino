@@ -5,10 +5,12 @@
 
 int instruction[8] = {5,0,0,0,0,0,0,0};
 
-/// instruction[0] = 1 (LED), others (sensor)
+/// instruction[0] = 2 (LED), others (sensor)
 ///
 ///
-/// instruction [0] = 1 ==>  instruction [1] is port (LED digital pin)
+/// instruction [0] = 4 ==>  check senesors
+///
+/// instruction [0] = 2 ==>  instruction [1] is port (LED digital pin)
 ///                          instruction [2] is: 0 (LED off) or 1 (LED on)
 ///
 /// instruction [0] = others ==> read sensors and write(send) them
@@ -67,7 +69,7 @@ void receiveI2C(int bytesIn)
   }
   int x = Wire.read(); // Read the last dummy byte (has no meaning, but must read it)
 
-  if( instruction[0] == 1 )  
+  if( instruction[0] == 2 )  
   {
     Serial.println("  Light ");
     
@@ -92,19 +94,60 @@ void receiveI2C(int bytesIn)
 
 void requestEvent()
 {  
-  if (instruction[0] == 4)
+  if (instruction[0] == 0 or instruction[0] == 1)
   {
-    Wire.write(temp_sensor); // respond with message
+    byte temp_sensor[8] = {0,0,0,0,0,0,0,0}
+
+    if (instruction[0] == 1) // マイクロスイッチ
+    {
+      microswitches()
+      temp_sensor[0] = microswitches_condition[0]
+      temp_sensor[1] = microswitches_condition[1]
+    }
+
+    if (instruction[1] == 1) // 超音波センサー左
+    {
+      ultrasonic_sensor(0)
+    }
+
+    if (instruction[2] == 1) // 超音波センサー右
+    {
+      ultrasonic_sensor(1)
+    }
+
+    if (instruction[3] == 1) // フォトリフレクタ
+    {
+      if (photo_refrector() > 800)
+      {
+        temp_sensor[4] = 0
+      }
+      else
+      {
+        temp_sensor[4] = 1
+      }
+    }
+
+    if (instruction[4] == 1)
+    {}
+
+    Wire.write(temp_sensor, 8); // respond with message
     Serial.print("Value: ");
     Serial.println(temp_sensor);
-  } 
+  }
+  else if (instruction[0] == 4) // 適当なデーターを送ってI2C接続を確認
+  {
+    byte test_I2C[8] = {0,1,127,-127,1,1,1,1};
+    Wire.write(test_I2C, 8);
+  }
 }//end requestEvent
+//________________________________________________________________________________
 //________________________________________________________________________________
 
 void microswitches() 
 {
   microswitches_condition = {digitalRead(12), digitalRead(11)}; // 11が左、12が右
 }
+//________________________________________________________________________________
 
 void ultrasonic_sensor()
 {
@@ -157,6 +200,7 @@ void ultrasonic_sensor()
 
   Serial.println(cm);
 }
+//________________________________________________________________________________
 
 int photo_refrector()
 {
@@ -164,5 +208,6 @@ int photo_refrector()
   Serial.println(val);
   return val;
 }
+//________________________________________________________________________________
 
 void gyro_sensor() {}
