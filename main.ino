@@ -37,10 +37,7 @@ void setup()
 }
 
 //________________________________________________________________________________
-void loop()
-{
-  delay(50);      
-}
+void loop(){}
 
 //________________________________________________________________________________
 //________________________________________________________________________________
@@ -48,7 +45,6 @@ void loop()
 
 byte read_byte = 0x00;
 int byte_count = 0;
-
 
 // When data is received from NXT/EV3, this function is called.
 void receiveI2C(int bytesIn)
@@ -65,6 +61,7 @@ void receiveI2C(int bytesIn)
   }
   int x = Wire.read(); // Read the last dummy byte (has no meaning, but must read it)
 
+  Serial.println(instruction[0]);
   if( instruction[0] == 2 )  
   {
     Serial.println("  Light ");
@@ -94,7 +91,7 @@ void requestEvent()
   {
     byte temp_sensor[2] = {0,0};
 
-    if (instruction[0] == 1) // マイクロスイッチ
+    if (instruction[0] == 3) // マイクロスイッチ
     {
       microswitches();
       temp_sensor[0] = microswitches_condition[0];
@@ -119,6 +116,8 @@ void microswitches()
 {
   microswitches_condition[0] = digitalRead(12);
   microswitches_condition[1] = digitalRead(11); // 11が左、12が右
+  Serial.print(microswitches_condition[0]);
+  Serial.print(microswitches_condition[1]);
 }
 //________________________________________________________________________________
 
