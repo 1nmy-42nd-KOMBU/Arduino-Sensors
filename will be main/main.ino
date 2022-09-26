@@ -19,8 +19,9 @@ int instruction[8] = {5,0,0,0,0,0,0,0};
 //________________________________________________________________________________
 //________________________________________________________________________________
 
-int microswitches_condition[2] = {0, 0};
 float gyro_angles[3] = {0, 0, 0};
+byte temp[2] = {0,0};
+byte microswitches_condition[2] = {0,0};
 
 void setup()
 {
@@ -48,6 +49,7 @@ void loop(){}
 
 byte read_byte = 0x00;
 int byte_count = 0;
+int count = 0;
 
 // When data is received from NXT/EV3, this function is called.
 void receiveI2C(int bytesIn)
@@ -111,15 +113,15 @@ void requestEvent()
       Serial.print(temp_sensor[0]);
       Serial.println(temp_sensor[1]);
     }
-    else if (instruction[1] == 4) // フォトリフレクタ
+    else if (instruction[1] == 2)
     {
-      byte val = photo_refrector();
-      Wire.write(val);
-      Serial.println(val);
+      int val = ultrasonic_sensor();
+      Wire.write(byte(val));
     }
   }
   else if (instruction[0] == 4) // 適当なデーターを送ってI2C接続を確認
   {
+    Serial.println("test");
     byte test_I2C[8] = {0,1,127,byte(-127),1,1,1,1};
     Wire.write(test_I2C, 8);
   }
@@ -134,49 +136,42 @@ void microswitches()
 }
 //________________________________________________________________________________
 
-int ultrasonic_sensor(int pin)
+int ultrasonic_sensor()
 {
-  unsigned long duration;
-  int cm;
-  int pingPin = 2;
+  // unsigned long duration;
+  // int cm;
+  // int pingPin = 2;
 
-  if (pin == 3)
-  {
-    pingPin = 3;
-  }
+  // //ピンをOUTPUTに設定（パルス送信のため）
+  // pinMode(pingPin, OUTPUT);
+  // //LOWパルスを送信
+  // digitalWrite(pingPin, LOW);
+  // delayMicroseconds(2);  
+  // //HIGHパルスを送信
+  // digitalWrite(pingPin, HIGH);  
+  // //5uSパルスを送信してPingSensorを起動
+  // delayMicroseconds(5); 
+  // digitalWrite(pingPin, LOW); 
+  
+  // //入力パルスを読み取るためにデジタルピンをINPUTに変更（シグナルピンを入力に切り替え）
+  // pinMode(pingPin, INPUT);   
+  
+  // //入力パルスの長さを測定
+  // duration = pulseIn(pingPin, HIGH);  
 
-  //ピンをOUTPUTに設定（パルス送信のため）
-  pinMode(pingPin, OUTPUT);
-  //LOWパルスを送信
-  digitalWrite(pingPin, LOW);
-  delayMicroseconds(2);  
-  //HIGHパルスを送信
-  digitalWrite(pingPin, HIGH);  
-  //5uSパルスを送信してPingSensorを起動
-  delayMicroseconds(5); 
-  digitalWrite(pingPin, LOW); 
+  // //パルスの長さを半分に分割
+  // duration=duration/2;  
+  // //cmに変換
+  // cm = int(duration/29); 
   
-  //入力パルスを読み取るためにデジタルピンをINPUTに変更（シグナルピンを入力に切り替え）
-  pinMode(pingPin, INPUT);   
-  
-  //入力パルスの長さを測定
-  duration = pulseIn(pingPin, HIGH);  
-
-  //パルスの長さを半分に分割
-  duration=duration/2;  
-  //cmに変換
-  cm = int(duration/29); 
-  
-  Serial.println(cm);
-  return cm;
+  // return cm;
+  count ++;
+  if (count > 127) {count = 0;}
+  Serial.print("count: ");
+  Serial.println(count);
+  return count;
 }
-//________________________________________________________________________________
 
-int photo_refrector()
-{
-  int val = analogRead(A6) / 10;
-  return val;
-}
 //________________________________________________________________________________
 
 void gyro_sensor() {}

@@ -20,7 +20,7 @@ int instruction[8] = {5,0,0,0,0,0,0,0};
 //________________________________________________________________________________
 
 float gyro_angles[3] = {0, 0, 0};
-byte temp[1] = {0};
+byte temp[2] = {0,0};
 byte microswitches_condition[2] = {0,0};
 
 void setup()
@@ -86,9 +86,6 @@ void receiveI2C(int bytesIn)
       Serial.println("on");
       digitalWrite(instruction[1], HIGH);
     }
-  } else if (instruction[0] == 3 and instruction[1] == 2) {
-    temp[0] = ultrasonic_sensor(2);
-    Serial.println(temp[0]);
   }
 }//end recieveI2C
 
@@ -117,11 +114,14 @@ void requestEvent()
     }
     else if (instruction[1] == 2)
     {
-      Serial.println(temp[0]);
+      int val = ultrasonic_sensor();
+      Wire.write(byte(val));
+      Serial.println(val);
     }
   }
   else if (instruction[0] == 4) // 適当なデーターを送ってI2C接続を確認
   {
+    Serial.println("test");
     byte test_I2C[8] = {0,1,127,byte(-127),1,1,1,1};
     Wire.write(test_I2C, 8);
   }
@@ -136,40 +136,51 @@ void microswitches()
 }
 //________________________________________________________________________________
 
-int ultrasonic_sensor(int pin)
+int ultrasonic_sensor()
 {
-  unsigned long duration;
-  int cm;
+  Serial.println("ultrasonic");
+  // establish variables for duration of the ping, and the distance result
+  // in inches and centimeters:
+  long duration, inches, cm;
   int pingPin = 2;
+  int result = 0;
 
-  if (pin == 3)
-  {
-    pingPin = 3;
-  }
-
-  //ピンをOUTPUTに設定（パルス送信のため）
+  // The PING))) is triggered by a HIGH pulse of 2 or more microseconds.
+  // Give a short LOW pulse beforehand to ensure a clean HIGH pulse:
   pinMode(pingPin, OUTPUT);
-  //LOWパルスを送信
   digitalWrite(pingPin, LOW);
-  delayMicroseconds(2);  
-  //HIGHパルスを送信
-  digitalWrite(pingPin, HIGH);  
-  //5uSパルスを送信してPingSensorを起動
-  delayMicroseconds(5); 
-  digitalWrite(pingPin, LOW); 
-  
-  //入力パルスを読み取るためにデジタルピンをINPUTに変更（シグナルピンを入力に切り替え）
-  pinMode(pingPin, INPUT);   
-  
-  //入力パルスの長さを測定
-  duration = pulseIn(pingPin, HIGH);  
+  delayMicroseconds(2);
+  digitalWrite(pingPin, HIGH);
+  delayMicroseconds(5);
+  digitalWrite(pingPin, LOW);
 
-  //パルスの長さを半分に分割
-  duration=duration/2;  
-  //cmに変換
-  cm = int(duration/29); 
-  
-  return cm;
+  // The same pin is used to read the signal from the PING))): a HIGH pulse
+  // whose duration is the time (in microseconds) from the sending of the ping
+  // to the reception of its echo off of an object.
+  pinMode(pingPin, INPUT);
+  duration = pulseIn(pingPin, HIGH);
+
+  // convert the time into a distance
+  cm = duration / 29 / 2;
+
+  Serial.print(cm);
+  Serial.print("cm");
+  Serial.println();
+
+  Serial.print("You should wait for 100 ms");
+  delay(100);
+  Serial.print("done well");
+
+  int tmp = (int)cm;
+
+  if (tmp > 10) {
+    result = 11;
+  } else {
+    result = 9;
+  }
+  Serial.print("result: ");
+  Serial.println(result);
+  return result;
 }
 
 //________________________________________________________________________________
