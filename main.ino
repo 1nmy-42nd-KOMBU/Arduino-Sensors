@@ -42,7 +42,6 @@ void setup()
 
 //________________________________________________________________________________
 void loop(){}
-
 //________________________________________________________________________________
 //________________________________________________________________________________
 //________________________________________________________________________________
@@ -170,7 +169,10 @@ int ultrasonic_sensor()
   Serial.print("You should wait for 100 ms");
   // delay(100);
   unsigned long time_now = millis();
-  while(millis() < time_now + 100){}//wait approx. [period] ms 
+  while(millis() < time_now + 100){
+    Serial.println(millis());
+    Serial.println(time_now);
+  }//wait approx. [period] ms 
   Serial.print("done well");
 
   int tmp = (int)cm;
