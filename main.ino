@@ -168,11 +168,14 @@ int ultrasonic_sensor()
 
   Serial.print("You should wait for 100 ms");
   // delay(100);
-  unsigned long time_now = millis();
-  while(millis() < time_now + 100){
-    Serial.println(millis());
-    Serial.println(time_now);
-  }//wait approx. [period] ms 
+  // unsigned long time_now = millis();
+  // while(millis() < time_now + 100){
+  //   Serial.println(millis());
+  //   Serial.println(time_now);
+  // }//wait approx. [period] ms 
+  for(int i = 0; i < 100; i++) {
+    delayMicroseconds(1000); // 1ms
+  }
   Serial.print("done well");
 
   int tmp = (int)cm;
