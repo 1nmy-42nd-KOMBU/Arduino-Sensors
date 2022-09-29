@@ -114,8 +114,9 @@ void requestEvent()
     else if (instruction[1] == 2)
     {
       int val = ultrasonic_sensor();
-      Wire.write(byte(val));
       Serial.println(val);
+      Wire.write(byte(val));
+      Serial.println("written");
     }
   }
   else if (instruction[0] == 4) // 適当なデーターを送ってI2C接続を確認
@@ -173,10 +174,11 @@ int ultrasonic_sensor()
   //   Serial.println(millis());
   //   Serial.println(time_now);
   // }//wait approx. [period] ms 
-  for(int i = 0; i < 100; i++) {
+  for(int i = 0; i < 25; i++) {
     delayMicroseconds(1000); // 1ms
+    Serial.println("delay_ms");
   }
-  Serial.print("done well");
+  Serial.println("done well");
 
   int tmp = (int)cm;
 
