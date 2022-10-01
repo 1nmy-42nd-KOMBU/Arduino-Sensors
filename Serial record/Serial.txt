@@ -1,5 +1,0 @@
-Mode: 3
-request: 32
-ultrasonic
-44cm
-You should wait for 100 ms
