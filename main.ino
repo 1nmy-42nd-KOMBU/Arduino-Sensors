@@ -123,7 +123,8 @@ void requestEvent()
     }
     else if (instruction[1] == 3)
     {
-      Serial.print(photo_refrector_value);
+      Serial.println(photo_refrector_value);
+      Wire.write((byte)photo_refrector_value);
     }
   }
   else if (instruction[0] == 4) // 適当なデーターを送ってI2C接続を確認
