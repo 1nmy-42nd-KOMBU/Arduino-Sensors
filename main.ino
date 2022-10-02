@@ -190,11 +190,11 @@ int ultrasonic_sensor()
   // Serial.print("result: ");
   // Serial.println(result);
   // return result;
-  for(int i = 0; i < 100; i++) {
-    delayMicroseconds(1000); // 1ms
-    Serial.println("delay_ms");
-  }
-  return 10;
+  // for(int i = 0; i < 1; i++) {
+  //   delayMicroseconds(1000); // 1ms
+  // }
+  delayMicroseconds(85);
+  return 9;
 }
 
 //________________________________________________________________________________
