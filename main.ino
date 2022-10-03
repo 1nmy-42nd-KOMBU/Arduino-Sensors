@@ -22,6 +22,8 @@ int instruction[8] = {5,0,0,0,0,0,0,0};
 float gyro_angles[3] = {0, 0, 0};
 byte temp[2] = {0,0};
 byte microswitches_condition[2] = {0,0};
+int photo_refrector_value = 0;
+
 
 void setup()
 {
@@ -41,7 +43,11 @@ void setup()
 }
 
 //________________________________________________________________________________
-void loop(){}
+
+void loop(){
+  photo_refrector_value = analogRead(A6) / 10;
+}
+
 //________________________________________________________________________________
 //________________________________________________________________________________
 //________________________________________________________________________________
@@ -118,6 +124,12 @@ void requestEvent()
       Wire.write(byte(val));
       Serial.println("written");
     }
+    else if (instruction[1] == 3)
+    {
+      Serial.println(photo_refrector_value);
+      Wire.write((byte)photo_refrector_value);
+    }
+
   }
   else if (instruction[0] == 4) // 適当なデーターを送ってI2C接続を確認
   {
