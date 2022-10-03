@@ -24,6 +24,7 @@ byte temp[2] = {0,0};
 byte microswitches_condition[2] = {0,0};
 int photo_refrector_value = 0;
 
+
 void setup()
 {
   Wire.begin(0x04); // set the slave address
@@ -42,9 +43,11 @@ void setup()
 }
 
 //________________________________________________________________________________
+
 void loop(){
   photo_refrector_value = analogRead(A6) / 10;
 }
+
 //________________________________________________________________________________
 //________________________________________________________________________________
 //________________________________________________________________________________
@@ -126,6 +129,7 @@ void requestEvent()
       Serial.println(photo_refrector_value);
       Wire.write((byte)photo_refrector_value);
     }
+
   }
   else if (instruction[0] == 4) // 適当なデーターを送ってI2C接続を確認
   {
