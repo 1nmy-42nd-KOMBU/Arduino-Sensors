@@ -24,7 +24,6 @@ byte temp[2] = {0,0};
 byte microswitches_condition[2] = {0,0};
 int photo_refrector_value = 0;
 
-
 void setup()
 {
   Wire.begin(0x04); // set the slave address
@@ -46,6 +45,10 @@ void setup()
 
 void loop(){
   photo_refrector_value = analogRead(A6) / 10;
+
+  int left_ultrasonic_cm,right_ultrasonic_cm = 0;
+  left_ultrasonic_cm = ultrasonic_sensor(2);
+  right_ultrasonic_cm = ultrasonic_sensor(3);
 }
 
 //________________________________________________________________________________
@@ -106,7 +109,7 @@ void requestEvent()
   {
     byte temp_sensor[2] = {0,0};
 
-    if (instruction[1] == 1) // マイクロスイッチ
+    if (instruction[1] == 1) // マイクロスイッチ 3-1
     {
       microswitches();
       temp_sensor[0] = microswitches_condition[0];
@@ -117,21 +120,18 @@ void requestEvent()
       Serial.print(temp_sensor[0]);
       Serial.println(temp_sensor[1]);
     }
-    else if (instruction[1] == 2)
+    else if (instruction[1] == 2) // 超音波センサー 3-2
     {
-      int val = ultrasonic_sensor();
-      Serial.println(val);
-      Wire.write(byte(val));
-      Serial.println("written");
+      Serial.println();
+      Wire.write((byte));
     }
-    else if (instruction[1] == 3)
+    else if (instruction[1] == 3) // フォトリフレクタ 3-3
     {
       Serial.println(photo_refrector_value);
       Wire.write((byte)photo_refrector_value);
     }
-
   }
-  else if (instruction[0] == 4) // 適当なデーターを送ってI2C接続を確認
+  else if (instruction[0] == 4) // 適当なデーターを送ってI2C接続を確認 4
   {
     Serial.println("test");
     byte test_I2C[8] = {0,1,127,byte(-127),1,1,1,1};
@@ -148,65 +148,51 @@ void microswitches()
 }
 //________________________________________________________________________________
 
-int ultrasonic_sensor()
+int ultrasonic_sensor(int pin)
 {
-  // Serial.println("ultrasonic");
-  // // establish variables for duration of the ping, and the distance result
-  // // in inches and centimeters:
-  // long duration, inches, cm;
-  // int pingPin = 2;
-  // int result = 0;
+  Serial.println("ultrasonic");
+  // establish variables for duration of the ping, and the distance result
+  // in inches and centimeters:
+  long duration, cm;
+  int pingPin = pin;
+  Serial.print(pin);
+  if 
+  int result = 0;
 
-  // // The PING))) is triggered by a HIGH pulse of 2 or more microseconds.
-  // // Give a short LOW pulse beforehand to ensure a clean HIGH pulse:
-  // pinMode(pingPin, OUTPUT);
-  // digitalWrite(pingPin, LOW);
-  // delayMicroseconds(2);
-  // digitalWrite(pingPin, HIGH);
-  // delayMicroseconds(5);
-  // digitalWrite(pingPin, LOW);
+  // The PING))) is triggered by a HIGH pulse of 2 or more microseconds.
+  // Give a short LOW pulse beforehand to ensure a clean HIGH pulse:
+  noInterrupts(); // 割り込み停止
+  pinMode(pingPin, OUTPUT);
+  digitalWrite(pingPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(pingPin, HIGH);
+  delayMicroseconds(5);
+  digitalWrite(pingPin, LOW);
 
-  // // The same pin is used to read the signal from the PING))): a HIGH pulse
-  // // whose duration is the time (in microseconds) from the sending of the ping
-  // // to the reception of its echo off of an object.
-  // pinMode(pingPin, INPUT);
-  // duration = pulseIn(pingPin, HIGH);
+  // The same pin is used to read the signal from the PING))): a HIGH pulse
+  // whose duration is the time (in microseconds) from the sending of the ping
+  // to the reception of its echo off of an object.
+  pinMode(pingPin, INPUT);
+  duration = pulseIn(pingPin, HIGH);
 
-  // // convert the time into a distance
-  // cm = duration / 29 / 2;
+  // convert the time into a distance
+  cm = duration / 29 / 2;
 
-  // Serial.print(cm);
-  // Serial.print("cm");
-  // Serial.println();
+  if (cm > 10) {
+    result = 11;
+  } else {
+    result = 9;
+  }
+  interrupts(); // 割り込み開始
 
-  // Serial.print("You should wait for 100 ms");
-  // // delay(100);
-  // // unsigned long time_now = millis();
-  // // while(millis() < time_now + 100){
-  // //   Serial.println(millis());
-  // //   Serial.println(time_now);
-  // // }//wait approx. [period] ms 
+  Serial.print("ultrasonic sensor: ");
+  Serial.println(result);
+  Serial.print(cm);
+  Serial.println("cm");
+  return result;
   // for(int i = 0; i < 25; i++) {
   //   delayMicroseconds(1000); // 1ms
-  //   Serial.println("delay_ms");
-  // }
-  // Serial.println("done well");
-
-  // int tmp = (int)cm;
-
-  // if (tmp > 10) {
-  //   result = 11;
-  // } else {
-  //   result = 9;
-  // }
-  // Serial.print("result: ");
-  // Serial.println(result);
-  // return result;
-  // for(int i = 0; i < 1; i++) {
-  //   delayMicroseconds(1000); // 1ms
-  // }
-  delayMicroseconds(85);
-  return 9;
+  // } // wait for 25ms
 }
 
 //________________________________________________________________________________
