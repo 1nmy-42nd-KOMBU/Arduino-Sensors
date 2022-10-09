@@ -22,6 +22,7 @@ int instruction[8] = {5,0,0,0,0,0,0,0};
 float gyro_angles[3] = {0, 0, 0};
 byte temp[2] = {0,0};
 byte microswitches_condition[2] = {0,0};
+int photo_refrector_value = 0;
 
 void setup()
 {
@@ -41,7 +42,14 @@ void setup()
 }
 
 //________________________________________________________________________________
-void loop(){}
+
+void loop(){
+  photo_refrector_value = analogRead(A6) / 10;
+
+  int left_ultrasonic_cm,right_ultrasonic_cm = 0;
+  left_ultrasonic_cm = ultrasonic_sensor(2);
+  right_ultrasonic_cm = ultrasonic_sensor(3);
+}
 
 //________________________________________________________________________________
 //________________________________________________________________________________
@@ -49,7 +57,6 @@ void loop(){}
 
 byte read_byte = 0x00;
 int byte_count = 0;
-int count = 0;
 
 // When data is received from NXT/EV3, this function is called.
 void receiveI2C(int bytesIn)
@@ -102,7 +109,7 @@ void requestEvent()
   {
     byte temp_sensor[2] = {0,0};
 
-    if (instruction[1] == 1) // マイクロスイッチ
+    if (instruction[1] == 1) // マイクロスイッチ 3-1
     {
       microswitches();
       temp_sensor[0] = microswitches_condition[0];
@@ -113,13 +120,18 @@ void requestEvent()
       Serial.print(temp_sensor[0]);
       Serial.println(temp_sensor[1]);
     }
-    else if (instruction[1] == 2)
+    else if (instruction[1] == 2) // 超音波センサー 3-2
     {
-      int val = ultrasonic_sensor();
-      Wire.write(byte(val));
+      Serial.println();
+      Wire.write((byte));
+    }
+    else if (instruction[1] == 3) // フォトリフレクタ 3-3
+    {
+      Serial.println(photo_refrector_value);
+      Wire.write((byte)photo_refrector_value);
     }
   }
-  else if (instruction[0] == 4) // 適当なデーターを送ってI2C接続を確認
+  else if (instruction[0] == 4) // 適当なデーターを送ってI2C接続を確認 4
   {
     Serial.println("test");
     byte test_I2C[8] = {0,1,127,byte(-127),1,1,1,1};
@@ -136,40 +148,51 @@ void microswitches()
 }
 //________________________________________________________________________________
 
-int ultrasonic_sensor()
+int ultrasonic_sensor(int pin)
 {
-  // unsigned long duration;
-  // int cm;
-  // int pingPin = 2;
+  Serial.println("ultrasonic");
+  // establish variables for duration of the ping, and the distance result
+  // in inches and centimeters:
+  long duration, cm;
+  int pingPin = pin;
+  Serial.print(pin);
+  if 
+  int result = 0;
 
-  // //ピンをOUTPUTに設定（パルス送信のため）
-  // pinMode(pingPin, OUTPUT);
-  // //LOWパルスを送信
-  // digitalWrite(pingPin, LOW);
-  // delayMicroseconds(2);  
-  // //HIGHパルスを送信
-  // digitalWrite(pingPin, HIGH);  
-  // //5uSパルスを送信してPingSensorを起動
-  // delayMicroseconds(5); 
-  // digitalWrite(pingPin, LOW); 
-  
-  // //入力パルスを読み取るためにデジタルピンをINPUTに変更（シグナルピンを入力に切り替え）
-  // pinMode(pingPin, INPUT);   
-  
-  // //入力パルスの長さを測定
-  // duration = pulseIn(pingPin, HIGH);  
+  // The PING))) is triggered by a HIGH pulse of 2 or more microseconds.
+  // Give a short LOW pulse beforehand to ensure a clean HIGH pulse:
+  noInterrupts(); // 割り込み停止
+  pinMode(pingPin, OUTPUT);
+  digitalWrite(pingPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(pingPin, HIGH);
+  delayMicroseconds(5);
+  digitalWrite(pingPin, LOW);
 
-  // //パルスの長さを半分に分割
-  // duration=duration/2;  
-  // //cmに変換
-  // cm = int(duration/29); 
-  
-  // return cm;
-  count ++;
-  if (count > 127) {count = 0;}
-  Serial.print("count: ");
-  Serial.println(count);
-  return count;
+  // The same pin is used to read the signal from the PING))): a HIGH pulse
+  // whose duration is the time (in microseconds) from the sending of the ping
+  // to the reception of its echo off of an object.
+  pinMode(pingPin, INPUT);
+  duration = pulseIn(pingPin, HIGH);
+
+  // convert the time into a distance
+  cm = duration / 29 / 2;
+
+  if (cm > 10) {
+    result = 11;
+  } else {
+    result = 9;
+  }
+  interrupts(); // 割り込み開始
+
+  Serial.print("ultrasonic sensor: ");
+  Serial.println(result);
+  Serial.print(cm);
+  Serial.println("cm");
+  return result;
+  // for(int i = 0; i < 25; i++) {
+  //   delayMicroseconds(1000); // 1ms
+  // } // wait for 25ms
 }
 
 //________________________________________________________________________________
