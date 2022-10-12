@@ -2,7 +2,6 @@ const int pingPin = 1;
 const int pingPort = 9;
 unsigned long duration;
 int cm;
-#define OUTPUT_power 0
 
 void setup()
 {
