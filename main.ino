@@ -146,10 +146,14 @@ void requestEvent()
 //________________________________________________________________________________
 //________________________________________________________________________________
 
-void microswitches() 
+void microswitches()
 {
-  microswitches_condition[0] = digitalRead(12);
-  microswitches_condition[1] = digitalRead(11); // 11が左、12が右
+  //-------------------------------------------------------------------------------------
+  // Pin Map: digital 11 => PE0, Register => 1, left
+  //          digital 12 => PE1, Register => 2, right
+  //-------------------------------------------------------------------------------------
+  microswitches_condition[0] = PINE & _BV(2);// digitalRead(12);
+  microswitches_condition[1] = PINE & _BV(1);// digitalRead(11);
 }
 //________________________________________________________________________________
 
@@ -161,8 +165,8 @@ int ultrasonic_sensor(char pingPort,char pingPin)
   //      The same applies if you use other boards other than Nano Every.
   //  This code is available under ATMega328 emulation which emulates Arduino Uno
   //
-  //  Pin Map: digital pin 9 => PB0, Register => 1, blue seal is on
-  //           digital pin 10 => PB1, Register => 2, yellow seal is on
+  //  Pin Map: digital pin 9 => PB0, Register => 1, blue seal is on, left
+  //           digital pin 10 => PB1, Register => 2, yellow seal is on, right
   //-------------------------------------------------------------------------------------
 
   Serial.println("ultrasonic");
@@ -184,8 +188,7 @@ int ultrasonic_sensor(char pingPort,char pingPin)
   //入力パルスを読み取るためにデジタルピンをINPUTに変更
   DDRB &= ~_BV(pingPin); //pinMode(pingPort, INPUT);
 
-  //入力パルスの長さを測定
-  duration = pulseIn(pingPort, HIGH);
+  duration = pulseIn(pingPort, HIGH); //入力パルスの長さを測定
 
   cm = int(duration / 29 / 2); //cmに変換 & パルスの長さを半分に分割 
 
