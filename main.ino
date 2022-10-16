@@ -24,6 +24,7 @@ byte microswitches_condition[2] = {0,0};
 int photo_refrector_value = 0;
 bool ready_sensor_values = true;
 byte Tilt_sensor = 0;
+int left_ultrasonic_cm,right_ultrasonic_cm = 0;
 
 void setup()
 {
@@ -52,7 +53,7 @@ void loop(){
     }
 
     if (instruction[1] == 2){
-      int left_ultrasonic_cm,right_ultrasonic_cm = 0;
+      left_ultrasonic_cm,right_ultrasonic_cm = 0;
       left_ultrasonic_cm = ultrasonic_sensor(9,1);
       right_ultrasonic_cm = ultrasonic_sensor(10,2);
     }
@@ -114,7 +115,7 @@ void receiveI2C(int bytesIn)
       digitalWrite(instruction[1], HIGH);
     }
   }
-  else if (instruction[0 == 3]) // センサーの値を読み込ませる--------------------
+  else if (instruction[0] == 3) // センサーの値を読み込ませる--------------------
   {
     ready_sensor_values = false;
   }
@@ -140,14 +141,17 @@ void requestEvent()
     }
     else if (instruction[1] == 2) // 超音波センサー 3-2-------------------------
     {
-      Serial.println();
+      Serial.print("left");
+      Serial.println(left_ultrasonic_cm);
+      Serial.print("right");
+      Serial.println(right_ultrasonic_cm);
       Wire.write(1);
     }
     else if (instruction[1] == 3) // フォトリフレクタ 3-3-----------------------
     {
       Serial.println(photo_refrector_value);
       Wire.write((byte)photo_refrector_value);
-    } else if (instruction[1] == 4) // チルトセンサー---------------------------
+    } else if (instruction[1] == 4) // チルトセンサー 3-4-----------------------
     {
       Serial.println(Tilt_sensor);
       Wire.write(Tilt_sensor);
@@ -191,7 +195,6 @@ int ultrasonic_sensor(char pingPort,char pingPin)
   unsigned long duration, cm;
   int result = 0;
 
-  noInterrupts(); // 割り込み停止-------------------------------------------------------
   //ピンをOUTPUTに設定（パルス送信のため）
   DDRB |= _BV(pingPin); // pinMode(pingPort, OUTPUT);
   //LOWパルスを送信
@@ -215,7 +218,6 @@ int ultrasonic_sensor(char pingPort,char pingPin)
   } else {
     result = 9;
   }
-  interrupts(); // 割り込み開始--------------------------------------------------
 
   Serial.print("ultrasonic sensor: ");
   Serial.println(result);
