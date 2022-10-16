@@ -8,9 +8,9 @@ int instruction[8] = {5,0,0,0,0,0,0,0};
 /// instruction[0] = 2 (LED), others (sensor)
 ///
 ///
-/// instruction [0] = 4 ==>  check senesors
+/// instruction [0] = 4 ==>  check sensors
 ///
-/// instruction [0] = 3 ==>  microswitches
+/// instruction [0] = 3 ==>  micro switches
 ///
 /// instruction [0] = 2 ==>  instruction [1] is port (LED digital pin)
 ///                          instruction [2] is: 0 (LED off) or 1 (LED on)
@@ -23,6 +23,7 @@ float gyro_angles[3] = {0, 0, 0};
 byte temp[2] = {0,0};
 byte microswitches_condition[2] = {0,0};
 int photo_refrector_value = 0;
+bool ready_sensor_values = false;
 
 void setup()
 {
@@ -37,18 +38,22 @@ void setup()
   pinMode( 11, INPUT_PULLUP );
   pinMode( 12, INPUT_PULLUP );
 
+  pinMode( 9, OUTPUT );
   pinMode( 10, OUTPUT );
-  digitalWrite(10,HIGH);
 }
 
 //________________________________________________________________________________
 
 void loop(){
-  photo_refrector_value = analogRead(A6) / 10;
+  if (instruction[0] == 3 && !ready_sensor_values)
+  {
+    photo_refrector_value = analogRead(A6) / 10;
 
-  int left_ultrasonic_cm,right_ultrasonic_cm = 0;
-  left_ultrasonic_cm = ultrasonic_sensor(2);
-  right_ultrasonic_cm = ultrasonic_sensor(3);
+    int left_ultrasonic_cm,right_ultrasonic_cm = 0;
+    left_ultrasonic_cm = ultrasonic_sensor(9,1);
+    right_ultrasonic_cm = ultrasonic_sensor(10,2);
+    ready_sensor_values = true;
+  }
 }
 
 //________________________________________________________________________________
@@ -100,90 +105,99 @@ void receiveI2C(int bytesIn)
 //________________________________________________________________________________
 
 void requestEvent()
-{  
+{
   Serial.print("request: ");
   Serial.print(instruction[0]);
   Serial.println(instruction[1]);
 
   if (instruction[0] == 3)
   {
-    byte temp_sensor[2] = {0,0};
-
-    if (instruction[1] == 1) // マイクロスイッチ 3-1
+    if (instruction[1] == 1) // マイクロスイッチ 3-1----------------------------
     {
+      byte temp_sensor[2] = {0,0};
       microswitches();
       temp_sensor[0] = microswitches_condition[0];
       temp_sensor[1] = microswitches_condition[1];
 
-      Wire.write(temp_sensor, 2); // respond with message
+      Wire.write(temp_sensor, 2);
       Serial.print("Value: ");
       Serial.print(temp_sensor[0]);
       Serial.println(temp_sensor[1]);
     }
-    else if (instruction[1] == 2) // 超音波センサー 3-2
+    else if (instruction[1] == 2) // 超音波センサー 3-2-------------------------
     {
       Serial.println();
       Wire.write((byte));
     }
-    else if (instruction[1] == 3) // フォトリフレクタ 3-3
+    else if (instruction[1] == 3) // フォトリフレクタ 3-3-----------------------
     {
       Serial.println(photo_refrector_value);
       Wire.write((byte)photo_refrector_value);
     }
+    ready_sensor_values = false;
   }
-  else if (instruction[0] == 4) // 適当なデーターを送ってI2C接続を確認 4
+  else if (instruction[0] == 4) // 適当なデーターを送ってI2C接続を確認 4_______________
   {
     Serial.println("test");
-    byte test_I2C[8] = {0,1,127,byte(-127),1,1,1,1};
+    byte test_I2C[8] = {0,1,127,byte(-127),1,2,3,4};
     Wire.write(test_I2C, 8);
   }
-}//end requestEvent
+}
 //________________________________________________________________________________
 //________________________________________________________________________________
 
-void microswitches() 
+void microswitches()
 {
-  microswitches_condition[0] = digitalRead(12);
-  microswitches_condition[1] = digitalRead(11); // 11が左、12が右
+  //-------------------------------------------------------------------------------------
+  // Pin Map: digital 11 => PE0, Register => 1, left
+  //          digital 12 => PE1, Register => 2, right
+  //-------------------------------------------------------------------------------------
+  microswitches_condition[0] = PINE & _BV(2);// digitalRead(12);
+  microswitches_condition[1] = PINE & _BV(1);// digitalRead(11);
 }
 //________________________________________________________________________________
 
-int ultrasonic_sensor(int pin)
+int ultrasonic_sensor(char pingPort,char pingPin)
 {
+  //-------------------------------------------------------------------------------------
+  //  This code is available in case you use pin 9 or 10.
+  //  You have to change addresses when you use other pins.
+  //      The same applies if you use other boards other than Nano Every.
+  //  This code is available under ATMega328 emulation which emulates Arduino Uno
+  //
+  //  Pin Map: digital pin 9 => PB0, Register => 1, blue seal is on, left
+  //           digital pin 10 => PB1, Register => 2, yellow seal is on, right
+  //-------------------------------------------------------------------------------------
+
   Serial.println("ultrasonic");
-  // establish variables for duration of the ping, and the distance result
-  // in inches and centimeters:
-  long duration, cm;
-  int pingPin = pin;
-  Serial.print(pin);
-  if 
+  unsigned long duration, cm;
   int result = 0;
 
-  // The PING))) is triggered by a HIGH pulse of 2 or more microseconds.
-  // Give a short LOW pulse beforehand to ensure a clean HIGH pulse:
-  noInterrupts(); // 割り込み停止
-  pinMode(pingPin, OUTPUT);
-  digitalWrite(pingPin, LOW);
-  delayMicroseconds(2);
-  digitalWrite(pingPin, HIGH);
-  delayMicroseconds(5);
-  digitalWrite(pingPin, LOW);
+  noInterrupts(); // 割り込み停止-------------------------------------------------------
+  //ピンをOUTPUTに設定（パルス送信のため）
+  DDRB |= _BV(pingPin); // pinMode(pingPort, OUTPUT);
+  //LOWパルスを送信
+  PORTB &= ~_BV(pingPin); // digitalWrite(pingPort,LOW);
+  delayMicroseconds(2);  
+  //HIGHパルスを送信
+  PORTB |= _BV(pingPin); // digitalWrite(pingPort, HIGH);
+  //5uSパルスを送信してPingSensorを起動
+  delayMicroseconds(5); 
+  PORTB &= ~_BV(pingPin); // digitalWrite(pingPort,LOW);
 
-  // The same pin is used to read the signal from the PING))): a HIGH pulse
-  // whose duration is the time (in microseconds) from the sending of the ping
-  // to the reception of its echo off of an object.
-  pinMode(pingPin, INPUT);
-  duration = pulseIn(pingPin, HIGH);
+  //入力パルスを読み取るためにデジタルピンをINPUTに変更
+  DDRB &= ~_BV(pingPin); //pinMode(pingPort, INPUT);
 
-  // convert the time into a distance
-  cm = duration / 29 / 2;
+  duration = pulseIn(pingPort, HIGH); //入力パルスの長さを測定
+
+  cm = int(duration / 29 / 2); //cmに変換 & パルスの長さを半分に分割 
 
   if (cm > 10) {
     result = 11;
   } else {
     result = 9;
   }
-  interrupts(); // 割り込み開始
+  interrupts(); // 割り込み開始--------------------------------------------------
 
   Serial.print("ultrasonic sensor: ");
   Serial.println(result);

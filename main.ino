@@ -20,10 +20,10 @@ int instruction[8] = {5,0,0,0,0,0,0,0};
 //________________________________________________________________________________
 
 float gyro_angles[3] = {0, 0, 0};
-byte temp[2] = {0,0};
 byte microswitches_condition[2] = {0,0};
 int photo_refrector_value = 0;
-bool ready_sensor_values = false;
+bool ready_sensor_values = true;
+byte Tilt_sensor = 0;
 
 void setup()
 {
@@ -42,23 +42,37 @@ void setup()
   pinMode( 10, OUTPUT );
 }
 
-//________________________________________________________________________________
+//____________________________________________________________________________________________________
 
 void loop(){
   if (instruction[0] == 3 && !ready_sensor_values)
   {
-    photo_refrector_value = analogRead(A6) / 10;
+    if (instruction[1] == 1){
+      microswitches();
+    }
 
-    int left_ultrasonic_cm,right_ultrasonic_cm = 0;
-    left_ultrasonic_cm = ultrasonic_sensor(9,1);
-    right_ultrasonic_cm = ultrasonic_sensor(10,2);
+    if (instruction[1] == 2){
+      int left_ultrasonic_cm,right_ultrasonic_cm = 0;
+      left_ultrasonic_cm = ultrasonic_sensor(9,1);
+      right_ultrasonic_cm = ultrasonic_sensor(10,2);
+    }
+
+    if (instruction[1] == 3){
+      photo_refrector_value = analogRead(A6) / 10;
+    }
+
+    if (instruction[1] == 4){
+      Tilt_sensor = digitalRead(2);
+    }
+
     ready_sensor_values = true;
+    Serial.println("load");
   }
 }
 
-//________________________________________________________________________________
-//________________________________________________________________________________
-//________________________________________________________________________________
+//____________________________________________________________________________________________________
+//____________________________________________________________________________________________________
+//____________________________________________________________________________________________________
 
 byte read_byte = 0x00;
 int byte_count = 0;
@@ -81,7 +95,7 @@ void receiveI2C(int bytesIn)
   Serial.print("Mode: ");
   Serial.println(instruction[0]);
 
-  if( instruction[0] == 2 )  
+  if( instruction[0] == 2 ) // Pin13のLED関係-----------------------------------  
   {
     Serial.println("  Light ");
     
@@ -94,15 +108,19 @@ void receiveI2C(int bytesIn)
       Serial.println("off");
       digitalWrite(instruction[1], LOW);
     }
-    else                    
+    else                 
     {
       Serial.println("on");
       digitalWrite(instruction[1], HIGH);
     }
   }
-}//end recieveI2C
+  else if (instruction[0 == 3]) // センサーの値を読み込ませる--------------------
+  {
+    ready_sensor_values = false;
+  }
+}
 
-//________________________________________________________________________________
+//____________________________________________________________________________________________________
 
 void requestEvent()
 {
@@ -114,25 +132,25 @@ void requestEvent()
   {
     if (instruction[1] == 1) // マイクロスイッチ 3-1----------------------------
     {
-      byte temp_sensor[2] = {0,0};
-      microswitches();
-      temp_sensor[0] = microswitches_condition[0];
-      temp_sensor[1] = microswitches_condition[1];
-
-      Wire.write(temp_sensor, 2);
+      byte temp[2] = {microswitches_condition[0],microswitches_condition[1]};
+      Wire.write(temp, 2);
       Serial.print("Value: ");
-      Serial.print(temp_sensor[0]);
-      Serial.println(temp_sensor[1]);
+      Serial.print(microswitches_condition[0]);
+      Serial.println(microswitches_condition[1]);
     }
     else if (instruction[1] == 2) // 超音波センサー 3-2-------------------------
     {
       Serial.println();
-      Wire.write((byte));
+      Wire.write(1);
     }
     else if (instruction[1] == 3) // フォトリフレクタ 3-3-----------------------
     {
       Serial.println(photo_refrector_value);
       Wire.write((byte)photo_refrector_value);
+    } else if (instruction[1] == 4) // チルトセンサー---------------------------
+    {
+      Serial.println(Tilt_sensor);
+      Wire.write(Tilt_sensor);
     }
     ready_sensor_values = false;
   }
@@ -143,15 +161,19 @@ void requestEvent()
     Wire.write(test_I2C, 8);
   }
 }
-//________________________________________________________________________________
-//________________________________________________________________________________
+//____________________________________________________________________________________________________
+//____________________________________________________________________________________________________
 
-void microswitches() 
+void microswitches()
 {
+  //-------------------------------------------------------------------------------------
+  // Pin Map: digital 11 => PE0, Register => 1, left
+  //          digital 12 => PE1, Register => 2, right
+  //-------------------------------------------------------------------------------------
   microswitches_condition[0] = digitalRead(12);
-  microswitches_condition[1] = digitalRead(11); // 11が左、12が右
+  microswitches_condition[1] = digitalRead(11);
 }
-//________________________________________________________________________________
+//____________________________________________________________________________________________________
 
 int ultrasonic_sensor(char pingPort,char pingPin)
 {
@@ -161,8 +183,8 @@ int ultrasonic_sensor(char pingPort,char pingPin)
   //      The same applies if you use other boards other than Nano Every.
   //  This code is available under ATMega328 emulation which emulates Arduino Uno
   //
-  //  Pin Map: digital pin 9 => PB0, Register => 1, blue seal is on
-  //           digital pin 10 => PB1, Register => 2, yellow seal is on
+  //  Pin Map: digital pin 9 => PB0, Register => 1, blue seal is on, left
+  //           digital pin 10 => PB1, Register => 2, yellow seal is on, right
   //-------------------------------------------------------------------------------------
 
   Serial.println("ultrasonic");
@@ -184,8 +206,7 @@ int ultrasonic_sensor(char pingPort,char pingPin)
   //入力パルスを読み取るためにデジタルピンをINPUTに変更
   DDRB &= ~_BV(pingPin); //pinMode(pingPort, INPUT);
 
-  //入力パルスの長さを測定
-  duration = pulseIn(pingPort, HIGH);
+  duration = pulseIn(pingPort, HIGH); //入力パルスの長さを測定
 
   cm = int(duration / 29 / 2); //cmに変換 & パルスの長さを半分に分割 
 
@@ -206,6 +227,6 @@ int ultrasonic_sensor(char pingPort,char pingPin)
   // } // wait for 25ms
 }
 
-//________________________________________________________________________________
+//____________________________________________________________________________________________________
 
 void gyro_sensor() {}
