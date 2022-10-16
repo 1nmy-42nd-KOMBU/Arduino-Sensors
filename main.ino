@@ -20,7 +20,6 @@ int instruction[8] = {5,0,0,0,0,0,0,0};
 //________________________________________________________________________________
 
 float gyro_angles[3] = {0, 0, 0};
-byte temp[2] = {0,0};
 byte microswitches_condition[2] = {0,0};
 int photo_refrector_value = 0;
 bool ready_sensor_values = true;
@@ -47,12 +46,22 @@ void setup()
 void loop(){
   if (instruction[0] == 3 && !ready_sensor_values)
   {
-    photo_refrector_value = analogRead(A6) / 10;
+    if (instruction[1] == 1){
+      microswitches();
+    }
 
-    int left_ultrasonic_cm,right_ultrasonic_cm = 0;
-    left_ultrasonic_cm = ultrasonic_sensor(9,1);
-    right_ultrasonic_cm = ultrasonic_sensor(10,2);
+    if (instruction[1] == 2){
+      int left_ultrasonic_cm,right_ultrasonic_cm = 0;
+      left_ultrasonic_cm = ultrasonic_sensor(9,1);
+      right_ultrasonic_cm = ultrasonic_sensor(10,2);
+    }
+
+    if (instruction[1] == 3){
+      photo_refrector_value = analogRead(A6) / 10;
+    }
+
     ready_sensor_values = true;
+    Serial.println("load");
   }
 }
 
@@ -94,7 +103,7 @@ void receiveI2C(int bytesIn)
       Serial.println("off");
       digitalWrite(instruction[1], LOW);
     }
-    else                    
+    else                 
     {
       Serial.println("on");
       digitalWrite(instruction[1], HIGH);
@@ -118,25 +127,24 @@ void requestEvent()
   {
     if (instruction[1] == 1) // マイクロスイッチ 3-1----------------------------
     {
-      byte temp_sensor[2] = {0,0};
-      microswitches();
-      temp_sensor[0] = microswitches_condition[0];
-      temp_sensor[1] = microswitches_condition[1];
-
-      Wire.write(temp_sensor, 2);
+      byte temp[2] = {microswitches_condition[0],microswitches_condition[1]};
+      Wire.write(temp, 2);
       Serial.print("Value: ");
-      Serial.print(temp_sensor[0]);
-      Serial.println(temp_sensor[1]);
+      Serial.print(microswitches_condition[0]);
+      Serial.println(microswitches_condition[1]);
     }
     else if (instruction[1] == 2) // 超音波センサー 3-2-------------------------
     {
       Serial.println();
-      Wire.write((byte));
+      Wire.write(1);
     }
     else if (instruction[1] == 3) // フォトリフレクタ 3-3-----------------------
     {
       Serial.println(photo_refrector_value);
       Wire.write((byte)photo_refrector_value);
+    } else if (instruction[1] == 4)
+    {
+      Serial.println(digitalRead(2));
     }
     ready_sensor_values = false;
   }
@@ -156,8 +164,8 @@ void microswitches()
   // Pin Map: digital 11 => PE0, Register => 1, left
   //          digital 12 => PE1, Register => 2, right
   //-------------------------------------------------------------------------------------
-  microswitches_condition[0] = PINE & _BV(2);// digitalRead(12);
-  microswitches_condition[1] = PINE & _BV(1);// digitalRead(11);
+  microswitches_condition[0] = digitalRead(12);
+  microswitches_condition[1] = digitalRead(11);
 }
 //____________________________________________________________________________________________________
 
