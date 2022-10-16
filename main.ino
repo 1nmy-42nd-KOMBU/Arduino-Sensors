@@ -23,6 +23,7 @@ float gyro_angles[3] = {0, 0, 0};
 byte microswitches_condition[2] = {0,0};
 int photo_refrector_value = 0;
 bool ready_sensor_values = true;
+byte Tilt_sensor = 0;
 
 void setup()
 {
@@ -58,6 +59,10 @@ void loop(){
 
     if (instruction[1] == 3){
       photo_refrector_value = analogRead(A6) / 10;
+    }
+
+    if (instruction[1] == 4){
+      Tilt_sensor = digitalRead(2);
     }
 
     ready_sensor_values = true;
@@ -142,9 +147,10 @@ void requestEvent()
     {
       Serial.println(photo_refrector_value);
       Wire.write((byte)photo_refrector_value);
-    } else if (instruction[1] == 4)
+    } else if (instruction[1] == 4) // チルトセンサー---------------------------
     {
-      Serial.println(digitalRead(2));
+      Serial.println(Tilt_sensor);
+      Wire.write(Tilt_sensor);
     }
     ready_sensor_values = false;
   }
