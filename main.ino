@@ -94,7 +94,8 @@ void receiveI2C(int bytesIn)
   int x = Wire.read(); // Read the last dummy byte (has no meaning, but must read it)
 
   Serial.print("Mode: ");
-  Serial.println(instruction[0]);
+  Serial.print(instruction[0]);
+  Serial.println(instruction[1]);
 
   if( instruction[0] == 2 ) // Pin13のLED関係-----------------------------------  
   {
@@ -114,10 +115,6 @@ void receiveI2C(int bytesIn)
       Serial.println("on");
       digitalWrite(instruction[1], HIGH);
     }
-  }
-  else if (instruction[0] == 3) // センサーの値を読み込ませる--------------------
-  {
-    ready_sensor_values = false;
   }
 }
 
@@ -224,9 +221,8 @@ int ultrasonic_sensor(char pingPort,char pingPin)
   Serial.print(cm);
   Serial.println("cm");
   return result;
-  // for(int i = 0; i < 25; i++) {
-  //   delayMicroseconds(1000); // 1ms
-  // } // wait for 25ms
+
+  // delayMicroseconds(200);
 }
 
 //____________________________________________________________________________________________________
