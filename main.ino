@@ -69,6 +69,8 @@ void loop(){
     ready_sensor_values = true;
     Serial.println("load");
   }
+  delay(100);
+  Serial.println(ready_sensor_values);
 }
 
 //____________________________________________________________________________________________________
@@ -138,11 +140,11 @@ void requestEvent()
     }
     else if (instruction[1] == 2) // 超音波センサー 3-2-------------------------
     {
+      Wire.write(1);
       Serial.print("left");
       Serial.println(left_ultrasonic_cm);
       Serial.print("right");
       Serial.println(right_ultrasonic_cm);
-      Wire.write(1);
     }
     else if (instruction[1] == 3) // フォトリフレクタ 3-3-----------------------
     {
@@ -154,6 +156,7 @@ void requestEvent()
       Wire.write(Tilt_sensor);
     }
     ready_sensor_values = false;
+    Serial.print("complete sending");
   }
   else if (instruction[0] == 4) // 適当なデーターを送ってI2C接続を確認 4_______________
   {
