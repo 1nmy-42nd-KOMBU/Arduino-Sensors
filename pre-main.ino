@@ -25,7 +25,7 @@ int photo_refrector_value = 0;
 bool ready_sensor_values = true;
 byte Tilt_sensor = 0;
 int left_ultrasonic_cm,right_ultrasonic_cm = 0;
-char data_sendtoEV3[8] = {0,0,0,0,0,0,0,0};
+char data_sendtoEV3[8] = {0,0,0,0,0,0,0,0}
 
 void setup()
 {
@@ -36,7 +36,7 @@ void setup()
   
   // Debugging
   Serial.begin(9600);
-
+// 
   pinMode( 11, INPUT_PULLUP );
   pinMode( 12, INPUT_PULLUP );
 
@@ -47,49 +47,37 @@ void setup()
 //____________________________________________________________________________________________________
 
 void loop(){
+  for (int i = 0; i < 4; i += 1) {
+    data_sendtoEV3[i] = 0;  // 要素を0で初期化
+  }
+  data_sendtoEV3[0] = instruction[0];
   if (instruction[0] == 3 && !ready_sensor_values)
   {
-    for (int i = 0; i < 8; i += 1) {
-      data_sendtoEV3[i] = 0;  // 要素を0で初期化
+    if (instruction[1] == 1){
+      microswitches();
     }
-    
-    if (instruction[0] == 3)
-    {
-      if (instruction[1] == 1){ // マイクロスイッチ 3-1----------------------------
-        microswitches();
-        data_sendtoEV3[0] = microswitches_condition[0]; // left
-        data_sendtoEV3[1] = microswitches_condition[1]; // right
-      }
 
-      if (instruction[1] == 2){ // 超音波センサー 3-2------------------------------
-        data_sendtoEV3[0] = ultrasonic_sensor(9,1); // left
-        data_sendtoEV3[1] = ultrasonic_sensor(10,2); // right
-      }
-
-      if (instruction[1] == 3){ // フォトリフレクタ 3-3----------------------------
-        photo_refrector_value = analogRead(A6) / 10;
-        data_sendtoEV3[0] = photo_refrector_value;
-      }
-
-      if (instruction[1] == 4){ // チルトセンサー 3-4------------------------------
-        Tilt_sensor = digitalRead(2);
-        data_sendtoEV3[0] = Tilt_sensor;
-      }
-
-      ready_sensor_values = true;
-      Serial.println("load");
-
+    if (instruction[1] == 2){
+      left_ultrasonic_cm,right_ultrasonic_cm = 0;
+      left_ultrasonic_cm = ultrasonic_sensor(9,1);
+      right_ultrasonic_cm = ultrasonic_sensor(10,2);
     }
-    else if (instruction[0] == 4)// 適当なデーターを送ってI2C接続を確認 4__________
-    {
-      byte test_I2C[8] = {0,1,127,byte(-127),1,2,3,4};
-      for(int i = 0; i < 8; i++) {
-          data_sendtoEV3[i] = test_I2C[i];
-      }
+
+    if (instruction[1] == 3){
+      photo_refrector_value = analogRead(A6) / 10;
     }
+
+    if (instruction[1] == 4){
+      Tilt_sensor = digitalRead(2);
+    }
+
+    ready_sensor_values = true;
+    Serial.println("load");
+  } else if (instruction[0] == 4) // 適当なデーターを送ってI2C接続を確認 4_______________
+  {
+    Serial.println("test");
+    byte data_sendEV3[8] = {0,1,127,byte(-127),1,2,3,4};
   }
-  delay(100);
-  Serial.println(ready_sensor_values);
 }
 
 //____________________________________________________________________________________________________
@@ -146,44 +134,42 @@ void requestEvent()
   Serial.print("request: ");
   Serial.print(instruction[0]);
   Serial.println(instruction[1]);
-  Wire.write(byte(data_sendtoEV3),8);
 
-  // if (instruction[0] == 3)
-  // {
-  //   if (instruction[1] == 1) // マイクロスイッチ 3-1----------------------------
-  //   {
-  //     byte temp[2] = {};
-  //     Wire.write(temp, 2);
-  //     Serial.print("Value: ");
-  //     Serial.print(microswitches_condition[0]);
-  //     Serial.println(microswitches_condition[1]);
-  //   }
-  //   else if (instruction[1] == 2) // 超音波センサー 3-2-------------------------
-  //   {
-  //     Wire.write(1);
-  //     Serial.print("left");
-  //     Serial.println(left_ultrasonic_cm);
-  //     Serial.print("right");
-  //     Serial.println(right_ultrasonic_cm);
-  //   }
-  //   else if (instruction[1] == 3) // フォトリフレクタ 3-3-----------------------
-  //   {
-  //     Serial.println(photo_refrector_value);
-  //     Wire.write((byte)photo_refrector_value);
-  //   } else if (instruction[1] == 4) // チルトセンサー 3-4-----------------------
-  //   {
-  //     Serial.println(Tilt_sensor);
-  //     Wire.write(Tilt_sensor);
-  //   }
-  //   ready_sensor_values = false;
-  //   Serial.print("complete sending");
-  // }
-  // else if (instruction[0] == 4) // 適当なデーターを送ってI2C接続を確認 4_______________
-  // {
-  //   Serial.println("test");
-  //   byte test_I2C[8] = {0,1,127,byte(-127),1,2,3,4};
-  //   Wire.write(test_I2C, 8);
-  // }
+  if (instruction[0] == 3)
+  {
+    if (instruction[1] == 1) // マイクロスイッチ 3-1----------------------------
+    {
+      byte temp[2] = {microswitches_condition[0],microswitches_condition[1]};
+      Wire.write(temp, 2);
+      Serial.print("Value: ");
+      Serial.print(microswitches_condition[0]);
+      Serial.println(microswitches_condition[1]);
+    }
+    else if (instruction[1] == 2) // 超音波センサー 3-2-------------------------
+    {
+      Serial.print("left");
+      Serial.println(left_ultrasonic_cm);
+      Serial.print("right");
+      Serial.println(right_ultrasonic_cm);
+      Wire.write(1);
+    }
+    else if (instruction[1] == 3) // フォトリフレクタ 3-3-----------------------
+    {
+      Serial.println(photo_refrector_value);
+      Wire.write((byte)photo_refrector_value);
+    } else if (instruction[1] == 4) // チルトセンサー 3-4-----------------------
+    {
+      Serial.println(Tilt_sensor);
+      Wire.write(Tilt_sensor);
+    }
+    ready_sensor_values = false;
+  }
+  else if (instruction[0] == 4) // 適当なデーターを送ってI2C接続を確認 4_______________
+  {
+    Serial.println("test");
+    byte test_I2C[8] = {0,1,127,byte(-127),1,2,3,4};
+    Wire.write(test_I2C, 8);
+  }
 }
 //____________________________________________________________________________________________________
 //____________________________________________________________________________________________________
