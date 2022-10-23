@@ -25,7 +25,7 @@ int photo_refrector_value = 0;
 bool ready_sensor_values = true;
 byte Tilt_sensor = 0;
 int left_ultrasonic_cm,right_ultrasonic_cm = 0;
-char data_sendtoEV3[8] = {0,0,0,0,0,0,0,0};
+byte data_sendtoEV3[8] = {0,0,0,0,0,0,0,0};
 
 void setup()
 {
@@ -78,18 +78,15 @@ void loop(){
 
       ready_sensor_values = true;
       Serial.println("load");
-
-    }
-    else if (instruction[0] == 4)// 適当なデーターを送ってI2C接続を確認 4__________
-    {
-      byte test_I2C[8] = {0,1,127,byte(-127),1,2,3,4};
-      for(int i = 0; i < 8; i++) {
-          data_sendtoEV3[i] = test_I2C[i];
-      }
     }
   }
-  delay(100);
-  Serial.println(ready_sensor_values);
+  else if (instruction[0] == 4)// 適当なデーターを送ってI2C接続を確認 4__________
+  {
+    byte test_I2C[8] = {0,1,127,byte(-127),1,2,3,4};
+    for(int i = 0; i < 8; i++) {
+      data_sendtoEV3[i] = test_I2C[i];
+    }
+  }
 }
 
 //____________________________________________________________________________________________________
@@ -143,11 +140,14 @@ void receiveI2C(int bytesIn)
 
 void requestEvent()
 {
-  Serial.print("request: ");
-  Serial.print(instruction[0]);
-  Serial.println(instruction[1]);
-  Wire.write(byte(data_sendtoEV3),8);
-
+  if (instruction[0] != 5)
+  {
+    Serial.print("request: ");
+    Serial.print(instruction[0]);
+    Serial.println(instruction[1]);
+    Wire.write(data_sendtoEV3,8);
+    ready_sensor_values = false;
+  }
   // if (instruction[0] == 3)
   // {
   //   if (instruction[1] == 1) // マイクロスイッチ 3-1----------------------------
