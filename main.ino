@@ -56,24 +56,28 @@ void loop(){
     if (instruction[0] == 3)
     {
       if (instruction[1] == 1){ // マイクロスイッチ 3-1----------------------------
+        data_sendtoEV3[0] = 1;
         microswitches();
-        data_sendtoEV3[0] = microswitches_condition[0]; // left
-        data_sendtoEV3[1] = microswitches_condition[1]; // right
+        data_sendtoEV3[1] = microswitches_condition[0]; // left
+        data_sendtoEV3[2] = microswitches_condition[1]; // right
       }
 
       if (instruction[1] == 2){ // 超音波センサー 3-2------------------------------
-        data_sendtoEV3[0] = ultrasonic_sensor(9,1); // left
-        data_sendtoEV3[1] = ultrasonic_sensor(10,2); // right
+        data_sendtoEV3[0] = 2;
+        data_sendtoEV3[1] = ultrasonic_sensor(9,1); // left
+        data_sendtoEV3[2] = ultrasonic_sensor(10,2); // right
       }
 
       if (instruction[1] == 3){ // フォトリフレクタ 3-3----------------------------
+        data_sendtoEV3[0] = 3;
         photo_refrector_value = analogRead(A6) / 10;
-        data_sendtoEV3[0] = photo_refrector_value;
+        data_sendtoEV3[1] = photo_refrector_value;
       }
 
       if (instruction[1] == 4){ // チルトセンサー 3-4------------------------------
+        data_sendtoEV3[0] = 4;
         Tilt_sensor = digitalRead(2);
-        data_sendtoEV3[0] = Tilt_sensor;
+        data_sendtoEV3[1] = Tilt_sensor;
       }
 
       ready_sensor_values = true;
