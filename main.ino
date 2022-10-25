@@ -1,21 +1,20 @@
 #include<Wire.h> // I2C library
 
-///----------------------------------------------
-///----------------------------------------------
+//________________________________________________________________________________
+//________________________________________________________________________________
 
 int instruction[8] = {5,0,0,0,0,0,0,0};
 
-/// instruction[0] = 2 (LED), others (sensor)
 ///
-///
-/// instruction [0] = 4 ==>  check sensors
+/// instruction [0] = 2 ==>  instruction [1] ==> Microswitches
+///                          instruction [2] ==> Ultrasonic
+///                          instruction [3] ==> Photo Refrector
+///                          instruction [4] ==> Tilt
 ///
 /// instruction [0] = 3 ==>  micro switches
 ///
-/// instruction [0] = 2 ==>  instruction [1] is port (LED digital pin)
-///                          instruction [2] is: 0 (LED off) or 1 (LED on)
+/// instruction [0] = 4 ==>  check sensors
 ///
-//________________________________________________________________________________
 //________________________________________________________________________________
 //________________________________________________________________________________
 
@@ -53,7 +52,7 @@ void loop(){
       data_sendtoEV3[i] = 0;  // 要素を0で初期化
     }
     
-    data_sendtoEV3[0] = instruction[0];
+    data_sendtoEV3[0] = instruction[1];
     if (instruction[1] == 1){ // マイクロスイッチ 3-1----------------------------
       microswitches();
       data_sendtoEV3[1] = microswitches_condition[0]; // left
