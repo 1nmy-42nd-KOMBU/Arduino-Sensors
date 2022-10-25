@@ -6,12 +6,13 @@
 int instruction[8] = {5,0,0,0,0,0,0,0};
 
 ///
-/// instruction [0] = 2 ==>  instruction [1] ==> Microswitches
+/// instruction [0] = 2 ==>  instruction [1] is port (LED digital pin)
+///                          instruction [2] is: 0 (LED off) or 1 (LED on)
+///
+/// instruction [0] = 3 ==>  instruction [1] ==> Microswitches
 ///                          instruction [2] ==> Ultrasonic
 ///                          instruction [3] ==> Photo Refrector
 ///                          instruction [4] ==> Tilt
-///
-/// instruction [0] = 3 ==>  micro switches
 ///
 /// instruction [0] = 4 ==>  check sensors
 ///
