@@ -45,10 +45,6 @@ void setup()
 void loop()
 {
 
-  DIR = getDIR(0);
-  Serial.print(DIR);
-  Serial.print("\t");
-
   GYRO = getGYRO(0);
   Serial.print(GYRO);
   Serial.print("\t");
@@ -61,31 +57,6 @@ void loop()
   Serial.println(ROLL);
   delay(1000);
 
-}
-
-
-unsigned int getGYRO(unsigned char) //ジャイロ角速度を読み込み。
-{
-  typedef union { //受信データ用共用体
-    unsigned int W;
-    struct {
-    unsigned char L;
-    unsigned char H;
-    };
-  } U_UINT;
-  U_UINT data; // 受信データ
-  int reg; //レジスターアドレス
-  reg = 0x18; // Register 0x1E:GYRO_DATA_Z (LSB-MSB)
-  Wire.beginTransmission(BNO055); //通信開始
-  Wire.write(reg); //register
-  Wire.endTransmission(); //通信終了
-
-  Wire.requestFrom(BNO055, 2);
-  if (Wire.available() > 1) {
-    data.L = Wire.read(); //１バイト分のデータの読み込み
-    data.H = Wire.read(); //次の１バイト分のデータを読み込み
-  }
-  return (data.W);
 }
 
 unsigned int getDIR(unsigned char) //ヘッドアップ角度を読み込み。
