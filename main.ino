@@ -3,7 +3,7 @@
 //________________________________________________________________________________
 //________________________________________________________________________________
 
-int instruction[8] = {5,0,0,0,0,0,0,0};
+char instruction[8] = {5,0,0,0,0,0,0,0};
 
 ///
 /// instruction [0] = 2 ==>  instruction [1] is port (LED digital pin)
@@ -89,13 +89,12 @@ void loop(){
 
 //____________________________________________________________________________________________________
 //____________________________________________________________________________________________________
-//____________________________________________________________________________________________________
 
 byte read_byte = 0x00;
 int byte_count = 0;
 
 // When data is received from NXT/EV3, this function is called.
-void receiveI2C(int bytesIn)
+void receiveI2C(char bytesIn)
 {
   read_byte = bytesIn;
   byte_count = 0;
@@ -113,7 +112,7 @@ void receiveI2C(int bytesIn)
   Serial.print(instruction[0]);
   Serial.println(instruction[1]);
 
-  if( instruction[0] == 2 ) // Pin13のLED関係-----------------------------------  
+  if( instruction[0] == 2 ) // Pin13のLED関連-----------------------------------  
   {
     Serial.println("  Light ");
     
@@ -211,5 +210,3 @@ int ultrasonic_sensor(char pingPort,char pingPin)
 }
 
 //____________________________________________________________________________________________________
-
-void gyro_sensor() {}
