@@ -3,7 +3,7 @@
 //________________________________________________________________________________
 //________________________________________________________________________________
 
-char instruction[8] = {5,0,0,0,0,0,0,0};
+int instruction[8] = {5,0,0,0,0,0,0,0};
 
 ///
 /// instruction [0] = 2 ==>  instruction [1] is port (LED digital pin)
@@ -19,7 +19,6 @@ char instruction[8] = {5,0,0,0,0,0,0,0};
 //________________________________________________________________________________
 //________________________________________________________________________________
 
-float gyro_angles[3] = {0, 0, 0};
 byte microswitches_condition[2] = {0,0};
 int photo_refrector_value = 0;
 bool ready_sensor_values = true;
@@ -94,7 +93,7 @@ byte read_byte = 0x00;
 int byte_count = 0;
 
 // When data is received from NXT/EV3, this function is called.
-void receiveI2C(char bytesIn)
+void receiveI2C(int bytesIn)
 {
   read_byte = bytesIn;
   byte_count = 0;
@@ -190,7 +189,7 @@ int ultrasonic_sensor(char pingPort,char pingPin)
   //入力パルスを読み取るためにデジタルピンをINPUTに変更
   DDRB &= ~_BV(pingPin); //pinMode(pingPort, INPUT);
 
-  duration = pulseIn(pingPort, HIGH); //入力パルスの長さを測定
+  duration = pulseIn(pingPort, HIGH,9); //入力パルスの長さを測定 9μsでタイムアウト
 
   cm = int(duration / 29 / 2); //cmに変換 & パルスの長さを半分に分割 
 
