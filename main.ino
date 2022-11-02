@@ -189,7 +189,7 @@ int ultrasonic_sensor(char pingPort,char pingPin)
   //入力パルスを読み取るためにデジタルピンをINPUTに変更
   DDRB &= ~_BV(pingPin); //pinMode(pingPort, INPUT);
 
-  duration = pulseIn(pingPort, HIGH,9); //入力パルスの長さを測定 9μsでタイムアウト
+  duration = pulseIn(pingPort, HIGH, 20000); //入力パルスの長さを測定 20μsでタイムアウト
 
   cm = int(duration / 29 / 2); //cmに変換 & パルスの長さを半分に分割 
 
