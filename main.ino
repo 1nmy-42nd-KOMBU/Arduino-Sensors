@@ -3,7 +3,7 @@
 //________________________________________________________________________________
 //________________________________________________________________________________
 
-int instruction[8] = {5,0,0,0,0,0,0,0};
+int8_t instruction[8] = {5,0,0,0,0,0,0,0};
 
 ///
 /// instruction [0] = 2 ==>  instruction [1] is port (LED digital pin)
@@ -72,7 +72,7 @@ void loop(){
       data_sendtoEV3[1] = Tilt_sensor[0];
       data_sendtoEV3[2] = Tilt_sensor[1];
     }
-    else if (instruction[1] == 19){ // 通常のライントレース中--------------------------
+    else if (instruction[1] == 19){ // 通常のライントレース中 3-19---------------------
       microswitches();
       data_sendtoEV3[1] = microswitches_condition[0]; // left
       data_sendtoEV3[2] = microswitches_condition[1]; // right
