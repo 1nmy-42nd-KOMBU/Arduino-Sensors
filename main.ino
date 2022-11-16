@@ -22,7 +22,7 @@ int instruction[8] = {5,0,0,0,0,0,0,0};
 byte microswitches_condition[2] = {0,0};
 int photo_refrector_value = 0;
 bool ready_sensor_values = true;
-byte Tilt_sensor = 0;
+byte Tilt_sensor[2] = {0,0};
 int left_ultrasonic_cm,right_ultrasonic_cm = 0;
 byte data_sendtoEV3[8] = {0,0,0,0,0,0,0,0};
 
@@ -51,27 +51,35 @@ void loop(){
     for (int i = 0; i < 8; i += 1) {
       data_sendtoEV3[i] = 0;  // 要素を0で初期化
     }
-    
     data_sendtoEV3[0] = instruction[1];
+
     if (instruction[1] == 1){ // マイクロスイッチ 3-1----------------------------
       microswitches();
       data_sendtoEV3[1] = microswitches_condition[0]; // left
       data_sendtoEV3[2] = microswitches_condition[1]; // right
     }
-
-    if (instruction[1] == 2){ // 超音波センサー 3-2------------------------------
+    else if (instruction[1] == 2){ // 超音波センサー 3-2------------------------------
       data_sendtoEV3[1] = ultrasonic_sensor(9,1); // left
       data_sendtoEV3[2] = ultrasonic_sensor(10,2); // right
     }
-
-    if (instruction[1] == 3){ // フォトリフレクタ 3-3----------------------------
+    else if (instruction[1] == 3){ // フォトリフレクタ 3-3----------------------------
       photo_refrector_value = analogRead(A6) / 10;
       data_sendtoEV3[1] = photo_refrector_value;
     }
-
-    if (instruction[1] == 4){ // チルトセンサー 3-4------------------------------
-      Tilt_sensor = digitalRead(2);
-      data_sendtoEV3[1] = Tilt_sensor;
+    else if (instruction[1] == 4){ // チルトセンサー 3-4------------------------------
+      Tilt_sensor[0] = digitalRead(3); // 上り
+      Tilt_sensor[1] = digitalRead(2); // 下り
+      data_sendtoEV3[1] = Tilt_sensor[0];
+      data_sendtoEV3[2] = Tilt_sensor[1];
+    }
+    else if (instruction[1] == 19){ // 通常のライントレース中--------------------------
+      microswitches();
+      data_sendtoEV3[1] = microswitches_condition[0]; // left
+      data_sendtoEV3[2] = microswitches_condition[1]; // right
+      Tilt_sensor[0] = digitalRead(3); // 上り
+      Tilt_sensor[1] = digitalRead(2); // 下り
+      data_sendtoEV3[1] = Tilt_sensor[0];
+      data_sendtoEV3[2] = Tilt_sensor[1];
     }
 
     ready_sensor_values = true;
@@ -172,8 +180,9 @@ int ultrasonic_sensor(char pingPort,char pingPin)
   //-------------------------------------------------------------------------------------
 
   Serial.println("ultrasonic");
-  unsigned long duration, cm;
-  int result = 0;
+  unsigned long duration;
+  int cm;
+  byte result;
 
   //ピンをOUTPUTに設定（パルス送信のため）
   DDRB |= _BV(pingPin); // pinMode(pingPort, OUTPUT);
@@ -189,14 +198,14 @@ int ultrasonic_sensor(char pingPort,char pingPin)
   //入力パルスを読み取るためにデジタルピンをINPUTに変更
   DDRB &= ~_BV(pingPin); //pinMode(pingPort, INPUT);
 
-  duration = pulseIn(pingPort, HIGH, 20000); //入力パルスの長さを測定 20msでタイムアウト
+  duration = pulseIn(pingPort, HIGH, 20000); //入力パルスの長さを測定 20μsでタイムアウト
 
   cm = int(duration / 29 / 2); //cmに変換 & パルスの長さを半分に分割 
 
-  if (cm > 10) {
-    result = 11;
+  if (cm / 2 - 127 > 127) {
+    result = 127
   } else {
-    result = 9;
+    result = cm / 2 - 127
   }
 
   Serial.print("ultrasonic sensor: ");
@@ -207,5 +216,4 @@ int ultrasonic_sensor(char pingPort,char pingPin)
 
   // delayMicroseconds(200);
 }
-
 //____________________________________________________________________________________________________
