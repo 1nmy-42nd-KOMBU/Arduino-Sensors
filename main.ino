@@ -22,7 +22,6 @@ int8_t instruction[8] = {5,0,0,0,0,0,0,0};
 byte microswitches_condition[2] = {0,0};
 int photo_refrector_value = 0;
 bool ready_sensor_values = true;
-byte Tilt_sensor[2] = {0,0};
 int left_ultrasonic_cm,right_ultrasonic_cm = 0;
 byte data_sendtoEV3[8] = {0,0,0,0,0,0,0,0};
 
@@ -67,10 +66,8 @@ void loop(){
       data_sendtoEV3[1] = photo_refrector_value;
     }
     else if (instruction[1] == 4){ // チルトセンサー 3-4------------------------------
-      Tilt_sensor[0] = digitalRead(3); // 上り
-      Tilt_sensor[1] = digitalRead(2); // 下り
-      data_sendtoEV3[1] = Tilt_sensor[0];
-      data_sendtoEV3[2] = Tilt_sensor[1];
+      data_sendtoEV3[1] = digitalRead(3); // 上り
+      data_sendtoEV3[2] = digitalRead(2); // 下り
     }
     else if (instruction[1] == 19){ // 通常のライントレース中 3-19---------------------
       // microswitches
@@ -79,10 +76,8 @@ void loop(){
       data_sendtoEV3[2] = microswitches_condition[1]; // right
       
       // tilt sensors
-      Tilt_sensor[0] = digitalRead(3); // 上り
-      Tilt_sensor[1] = digitalRead(2); // 下り
-      data_sendtoEV3[3] = Tilt_sensor[0];
-      data_sendtoEV3[4] = Tilt_sensor[1];
+      data_sendtoEV3[3] = digitalRead(3); // 上り
+      data_sendtoEV3[4] = digitalRead(2); // 下り
       
       // photo refrector
       photo_refrector_value = analogRead(A6) / 10;
