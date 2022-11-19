@@ -84,14 +84,9 @@ void loop(){
       data_sendtoEV3[5] = photo_refrector_value;
     }
     else if (instruction[1] == 28){ // レスキューゾーン 3-28----------------------------
-      // microswitches
-      microswitches();
-      data_sendtoEV3[1] = microswitches_condition[0]; // left
-      data_sendtoEV3[2] = microswitches_condition[1]; // right
-
       // ultrasonic sensors
-      data_sendtoEV3[3] = ultrasonic_sensor(9,1); // left
-      data_sendtoEV3[4] = ultrasonic_sensor(10,2); // right
+      data_sendtoEV3[1] = ultrasonic_sensor(9,1); // left
+      data_sendtoEV3[2] = ultrasonic_sensor(10,2); // right
     }
 
     ready_sensor_values = true;
