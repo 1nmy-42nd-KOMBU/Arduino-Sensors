@@ -210,9 +210,9 @@ int ultrasonic_sensor(char pingPort,char pingPin)
   cm = int(duration / 29 / 2); //cmに変換 & パルスの長さを半分に分割 
 
   if (cm / 2 - 127 > 127) {
-    result = 127
+    result = 127;
   } else {
-    result = cm / 2 - 127
+    result = cm / 2 - 127;
   }
 
   Serial.print("ultrasonic sensor: ");
