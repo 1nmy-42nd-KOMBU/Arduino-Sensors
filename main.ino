@@ -87,6 +87,11 @@ void loop(){
       // ultrasonic sensors
       data_sendtoEV3[1] = ultrasonic_sensor(9,1); // left
       data_sendtoEV3[2] = ultrasonic_sensor(10,2); // right
+
+      // microswitches
+      microswitches();
+      data_sendtoEV3[3] = microswitches_condition[0]; // left
+      data_sendtoEV3[4] = microswitches_condition[1]; // right
     }
 
     ready_sensor_values = true;
