@@ -83,7 +83,7 @@ void loop(){
       photo_refrector_value = analogRead(A6) / 10;
       data_sendtoEV3[5] = photo_refrector_value;
     }
-    else if (instruction[1] == 28){ // レスキューゾーン 3-28----------------------------
+    else if (instruction[1] == 28){ // 障害物回避 3-28----------------------------
       // ultrasonic sensors
       data_sendtoEV3[1] = ultrasonic_sensor(9,1); // left
       data_sendtoEV3[2] = ultrasonic_sensor(10,2); // right
@@ -92,6 +92,14 @@ void loop(){
       microswitches();
       data_sendtoEV3[3] = microswitches_condition[0]; // left
       data_sendtoEV3[4] = microswitches_condition[1]; // right
+    } else if (instruction[1] == 44){ // レスキュー 3-44--------------------------
+      // ultrasonic sensors
+      data_sendtoEV3[1] = ultrasonic_sensor(9,1); // left
+      data_sendtoEV3[2] = ultrasonic_sensor(10,2); // right
+
+      // カゴについているタッチセンサー
+      data_sendtoEV3[3] = digitalRead(7);
+      data_sendtoEV3[4] = digitalRead(8);
     }
 
     ready_sensor_values = true;
