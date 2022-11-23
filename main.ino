@@ -40,6 +40,9 @@ void setup()
 
   pinMode( 9, OUTPUT );
   pinMode( 10, OUTPUT );
+
+  pinMode( 8, INPUT_PULLUP );
+  pinMode( 7, INPUT_PULLUP );
 }
 
 //____________________________________________________________________________________________________
