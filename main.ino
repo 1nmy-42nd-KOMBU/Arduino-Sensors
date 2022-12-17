@@ -103,6 +103,9 @@ void loop(){
     } else if (instruction[1] == 44){ // レスキュー 3-44--------------------------
       // ultrasonic sensors
       data_sendtoEV3[1] = ultrasonic_sensor(10,2); // left
+      data_sendtoEV3[2] = ultrasonic_catch();
+      data_sendtoEV3[3] = digitalRead(7);
+      data_sendtoEV3[4] = digitalRead(8);
     } else if (instruction[1] == 45){ // レスキュー 3-45-------------------------
       data_sendtoEV3[1] = ultrasonic_catch();
       data_sendtoEV3[2] = digitalRead(7);
