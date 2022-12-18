@@ -1,4 +1,6 @@
 #include<Wire.h> // I2C library
+#include <SoftwareSerial.h>
+SoftwareSerial mySerial(4, 5); // RX, TX
 
 //________________________________________________________________________________
 //________________________________________________________________________________
@@ -34,6 +36,7 @@ void setup()
   
   // Debugging
   Serial.begin(9600);
+  mySerial.begin(57600);
 
   pinMode( 11, INPUT_PULLUP );
   pinMode( 12, INPUT_PULLUP );
@@ -43,6 +46,9 @@ void setup()
 
   pinMode( 8, INPUT_PULLUP );
   pinMode( 7, INPUT_PULLUP );
+
+  pinMode( 2, INPUT_PULLUP );
+  pinMode( 3, INPUT_PULLUP );
 }
 
 //____________________________________________________________________________________________________
@@ -88,8 +94,8 @@ void loop(){
     }
     else if (instruction[1] == 28){ // 障害物回避 3-28----------------------------
       // ultrasonic sensors
-      data_sendtoEV3[1] = ultrasonic_sensor(9,1); // left
-      data_sendtoEV3[2] = ultrasonic_sensor(10,2); // right
+      data_sendtoEV3[1] = ultrasonic_sensor(10,2); // left
+      data_sendtoEV3[2] = ultrasonic_sensor(9,1); // right
 
       // microswitches
       microswitches();
@@ -97,8 +103,40 @@ void loop(){
       data_sendtoEV3[4] = microswitches_condition[1]; // right
     } else if (instruction[1] == 44){ // レスキュー 3-44--------------------------
       // ultrasonic sensors
-      data_sendtoEV3[1] = ultrasonic_sensor(9,1); // left
-      data_sendtoEV3[2] = ultrasonic_sensor(10,2); // right
+      data_sendtoEV3[1] = ultrasonic_sensor(10,2); // left
+
+      // ESP32 UART-------------------------------------------------------------
+      mySerial.write(32);
+      Serial.flush();
+    
+      bool iftimeout = true;
+      unsigned long start_time = millis();
+      while (iftimeout) {
+        if (mySerial.available() > 0) {
+          iftimeout = false;
+        }
+        if (millis() - start_time > 10) {
+          Serial.println("timeout");
+          mySerial.write(32);
+          Serial.flush();
+          start_time = millis();
+          continue;
+        }
+        Serial.println("w");
+      }
+      byte list_arduino = 0;
+      list_arduino = mySerial.read();
+      while (mySerial.available() > 0) {
+        int8_t trash = mySerial.read();
+      }
+      if (list_arduino == 63 || list_arduino == 64 || list_arduino == 65) {
+        Serial.println(list_arduino);
+      }else{
+        Serial.print("e");
+        list_arduino = 0;
+      }
+      data_sendtoEV3[2] = list_arduino;
+      // -----------------------------------------------------------------------
 
       // カゴについているタッチセンサー
       data_sendtoEV3[3] = digitalRead(7);
