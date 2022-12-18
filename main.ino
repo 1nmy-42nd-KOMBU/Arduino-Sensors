@@ -38,8 +38,16 @@ void setup()
   pinMode( 11, INPUT_PULLUP );
   pinMode( 12, INPUT_PULLUP );
 
+  pinMode(5,OUTPUT);
+
   pinMode( 9, OUTPUT );
   pinMode( 10, OUTPUT );
+
+  pinMode( 8, INPUT_PULLUP );
+  pinMode( 7, INPUT_PULLUP );
+
+  pinMode( 2, INPUT_PULLUP );
+  pinMode( 3, INPUT_PULLUP );
 }
 
 //____________________________________________________________________________________________________
@@ -83,15 +91,28 @@ void loop(){
       photo_refrector_value = analogRead(A6) / 10;
       data_sendtoEV3[5] = photo_refrector_value;
     }
-    else if (instruction[1] == 28){ // レスキューゾーン 3-28----------------------------
+    else if (instruction[1] == 28){ // 障害物回避 3-28----------------------------
+      // ultrasonic sensors
+      data_sendtoEV3[1] = ultrasonic_sensor(10,2); // left
+      data_sendtoEV3[2] = ultrasonic_sensor(9,1); // right
+      
       // microswitches
       microswitches();
-      data_sendtoEV3[1] = microswitches_condition[0]; // left
-      data_sendtoEV3[2] = microswitches_condition[1]; // right
-
+      data_sendtoEV3[3] = microswitches_condition[0]; // left
+      data_sendtoEV3[4] = microswitches_condition[1]; // right
+    } else if (instruction[1] == 44){ // レスキュー 3-44--------------------------
       // ultrasonic sensors
-      data_sendtoEV3[3] = ultrasonic_sensor(9,1); // left
-      data_sendtoEV3[4] = ultrasonic_sensor(10,2); // right
+      data_sendtoEV3[1] = ultrasonic_sensor(10,2); // left
+      data_sendtoEV3[2] = digitalRead(7);
+      data_sendtoEV3[3] = digitalRead(8);
+      data_sendtoEV3[4] = digitalRead(12); // left
+      data_sendtoEV3[5] = digitalRead(11); // right
+    } else if (instruction[1] == 45){ // レスキュー 3-45-------------------------
+      data_sendtoEV3[1] = ultrasonic_catch();
+      data_sendtoEV3[2] = digitalRead(7);
+      data_sendtoEV3[3] = digitalRead(8);
+      data_sendtoEV3[4] = digitalRead(12); // left
+      data_sendtoEV3[5] = digitalRead(11); // right
     }
 
     ready_sensor_values = true;
@@ -191,7 +212,7 @@ int ultrasonic_sensor(char pingPort,char pingPin)
   //           digital pin 10 => PB1, Register => 2, yellow seal is on, right
   //-------------------------------------------------------------------------------------
 
-  Serial.println("ultrasonic");
+  Serial.print("US; ");
   unsigned long duration;
   int cm;
   byte result;
@@ -215,17 +236,47 @@ int ultrasonic_sensor(char pingPort,char pingPin)
   cm = int(duration / 29 / 2); //cmに変換 & パルスの長さを半分に分割 
 
   if (cm / 2 - 127 > 127) {
-    result = 127
+    result = 127;
   } else {
-    result = cm / 2 - 127
+    result = byte(cm / 2 - 127);
   }
 
-  Serial.print("ultrasonic sensor: ");
-  Serial.println(result);
-  Serial.print(cm);
-  Serial.println("cm");
+  Serial.println(cm);
   return result;
 
   // delayMicroseconds(200);
 }
 //____________________________________________________________________________________________________
+
+int ultrasonic_catch()
+{
+  unsigned long duration;
+  int cm;
+  byte result;
+
+  //ピンをOUTPUTに設定（パルス送信のため）
+  VPORTB.DIR |= 4;
+  //LOWパルスを送信
+  VPORTB.OUT &= ~4;
+  delayMicroseconds(2);  
+  //HIGHパルスを送信
+  VPORTB.OUT |=  4;
+  //5uSパルスを送信してPingSensorを起動
+  delayMicroseconds(5); 
+  VPORTB.OUT &= ~4;
+
+  //入力パルスを読み取るためにデジタルピンをINPUTに変更
+  VPORTB.DIR &= ~4;
+
+  duration = pulseIn(5, HIGH, 20000); //入力パルスの長さを測定 20μsでタイムアウト
+
+  cm = int(duration / 29 / 2); //cmに変換 & パルスの長さを半分に分割
+
+  if (cm / 2 - 127 > 127) {
+    result = 127;
+  } else {
+    result = byte(cm / 2 - 127);
+  }
+
+  return result;
+}
